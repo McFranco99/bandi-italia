@@ -349,6 +349,26 @@ def debug_bandi_json():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/debug/bandi_status', methods=['GET'])
+def debug_bandi_status():
+    try:
+        file_exists = os.path.exists(JSON_FILE)
+        data_preview = []
+        if file_exists:
+            with open(JSON_FILE, 'r', encoding='utf-8') as f:
+                bandi = json.load(f)
+                data_preview = bandi[:3]  # Mostra i primi 3 bandi
+        return jsonify({
+            'success': True,
+            'file_exists': file_exists,
+            'bandi_count': len(data_preview),
+            'preview': data_preview
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
 
 
 if __name__ == '__main__':
