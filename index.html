@@ -430,7 +430,7 @@
 
             } catch (error) {
                 console.error('Errore caricamento bandi:', error);
-                mostraStatus('error', '✗ Errore connessione API. Assicurati che api_server.py sia attivo su localhost:5000');
+                mostraStatus('error', '✗ Errore connessione API. Verifica che la tua API sia attiva online.');
                 document.getElementById('loadingState').style.display = 'none';
             }
         }
