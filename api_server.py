@@ -338,6 +338,15 @@ def health_check():
             'invitalia': INVITALIA_AVAILABLE
         }
     })
+    
+@app.route('/api/debug/bandi_json', methods=['GET'])
+def debug_bandi_json():
+    try:
+        with open(JSON_FILE, 'r', encoding='utf-8') as f:
+            bandi = json.load(f)
+        return jsonify({'success': True, 'count': len(bandi), 'example': bandi[:2]})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     print("=== BOOT FLASK! Inizio log Python visibili ===")
