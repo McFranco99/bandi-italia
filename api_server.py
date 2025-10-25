@@ -57,15 +57,22 @@ JSON_FILE = 'bandi_database_reale.json'
 def carica_bandi_da_json():
     """Carica bandi esistenti dal file JSON"""
     global bandi_cache
+    print("=== [DEBUG] Avvio caricamento JSON Bandi ===")
+    print(f"=== [DEBUG] Cerco file: {JSON_FILE}, esiste? {os.path.exists(JSON_FILE)} ===")
     try:
         if os.path.exists(JSON_FILE):
             with open(JSON_FILE, 'r', encoding='utf-8') as f:
                 bandi_cache = json.load(f)
                 print(f"✅ Caricati {len(bandi_cache)} bandi da {JSON_FILE}")
+                if len(bandi_cache) > 0:
+                    print(f"✪ [DEBUG] Primo bando: {bandi_cache[0]}")
                 return True
+        else:
+            print(f"⚠️ [DEBUG] File {JSON_FILE} non trovato nella cartella: {os.getcwd()}")
     except Exception as e:
         print(f"⚠️ Errore caricamento JSON: {e}")
     return False
+
 
 def salva_bandi_su_json():
     """Salva bandi su file JSON"""
@@ -331,6 +338,7 @@ def health_check():
     })
 
 if __name__ == '__main__':
+    print("=== BOOT FLASK! Inizio log Python visibili ===")
     print("\n" + "="*70)
     print("🚀 API SERVER BANDI ITALIA - 4 SCRAPER INTEGRATI")
     print("="*70)
