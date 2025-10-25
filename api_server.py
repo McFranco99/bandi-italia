@@ -256,13 +256,14 @@ def serve_frontend():
 
 @app.route('/api/bandi', methods=['GET'])
 def get_bandi():
-    """Endpoint principale per recuperare tutti i bandi"""
+    print(f"[DEBUG] BandI da restituire: {len(bandi_cache)}")
     return jsonify({
         'success': True,
         'count': len(bandi_cache),
         'ultimo_aggiornamento': ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None,
         'bandi': bandi_cache
     })
+
 
 @app.route('/api/bandi/categoria/<categoria>', methods=['GET'])
 def get_bandi_by_categoria(categoria):
@@ -347,6 +348,8 @@ def debug_bandi_json():
         return jsonify({'success': True, 'count': len(bandi), 'example': bandi[:2]})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+
 
 if __name__ == '__main__':
     print("=== BOOT FLASK! Inizio log Python visibili ===")
