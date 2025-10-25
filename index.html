@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇮🇹 Bandi Italia - Aggregatore Nazionale</title>
+    <style>
+        :root {
+            --color-bg: #fcfcf9;
+            --color-surface: #fffffe;
+            --color-text: #13343b;
+            --color-text-secondary: #626c71;
+            --color-primary: #21808d;
+            --color-primary-hover: #1d7480;
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-error: #c0152f;
+            --color-success: #21808d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-bg: #1f2121;
+                --color-surface: #262828;
+                --color-text: #f5f5f5;
+                --color-text-secondary: rgba(167, 169, 169, 0.7);
+                --color-primary: #32b8c6;
+                --color-primary-hover: #2da6b2;
+                --color-border: rgba(119, 124, 124, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .status-banner {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-banner.error {
+            border-color: var(--color-error);
+            background: rgba(192, 21, 47, 0.1);
+        }
+
+        .status-banner.success {
+            border-color: var(--color-success);
+            background: rgba(33, 128, 141, 0.1);
+        }
+
+        .filters {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        select, input {
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-surface);
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        select:focus, input:focus {
+            outline: 2px solid var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        .bandi-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .bando-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .bando-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .bando-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .bando-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .bando-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-category {
+            background: rgba(33, 128, 141, 0.1);
+            color: var(--color-primary);
+        }
+
+        .badge-region {
+            background: rgba(94, 82, 64, 0.1);
+            color: var(--color-text-secondary);
+        }
+
+        .badge-status {
+            background: rgba(33, 128, 141, 0.15);
+            color: var(--color-success);
+        }
+
+        .bando-description {
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .bando-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .bando-link {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .bando-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--color-text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--color-border);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">🇮🇹 Bandi Italia</div>
+            <div style="font-size: 12px; color: var(--color-text-secondary);">
+                Ultimo aggiornamento: <span id="lastUpdate">Caricamento...</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Status Banner -->
+        <div id="statusBanner" class="status-banner success" style="display: none;">
+            <span id="statusIcon">✓</span>
+            <span id="statusMessage">Connesso all'API</span>
+        </div>
+
+        <!-- Filtri -->
+        <div class="filters">
+            <h3 style="margin-bottom: 16px;">🔍 Cerca Bandi</h3>
+            <div class="filter-row">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="filterCategoria">
+                        <option value="">Tutte le categorie</option>
+                        <option value="lavoro">Lavoro e Concorsi</option>
+                        <option value="imprese">Imprese e Innovazione</option>
+                        <option value="immobili">Immobili e Aste</option>
+                        <option value="investimenti">Investimenti e Startup</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Regione</label>
+                    <select id="filterRegione">
+                        <option value="">Tutte le regioni</option>
+                        <option value="nazionale">Nazionale</option>
+                        <option value="lombardia">Lombardia</option>
+                        <option value="lazio">Lazio</option>
+                        <option value="veneto">Veneto</option>
+                        <option value="piemonte">Piemonte</option>
+                        <option value="toscana">Toscana</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ricerca testuale</label>
+                    <input type="text" id="searchText" placeholder="Cerca per titolo o descrizione...">
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="applicaFiltri()">Cerca</button>
+                <button class="btn btn-secondary" onclick="resetFiltri()">Reset</button>
+            </div>
+        </div>
+
+        <!-- Statistiche -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotale">0</div>
+                <div class="stat-label">Bandi Trovati</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAperti">0</div>
+                <div class="stat-label">Bandi Aperti</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statScadenza">0</div>
+                <div class="stat-label">In Scadenza</div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <div>Caricamento bandi in corso...</div>
+        </div>
+
+        <!-- Lista Bandi -->
+        <div id="bandiContainer" class="bandi-grid" style="display: none;"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📭</div>
+            <h3>Nessun bando trovato</h3>
+            <p>Prova a modificare i filtri di ricerca</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/bandi';
+        const STATS_URL = 'http://localhost:5000/api/stats';
+        
+        let tuttiBandi = [];
+        let bandiFiltrati = [];
+
+        // Carica bandi dall'API
+        async function caricaBandi() {
+            try {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('bandiContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('API non disponibile');
+                
+                const data = await response.json();
+                tuttiBandi = data.bandi || [];
+                bandiFiltrati = [...tuttiBandi];
+
+                // Aggiorna timestamp
+                if (data.ultimo_aggiornamento) {
+                    const date = new Date(data.ultimo_aggiornamento);
+                    document.getElementById('lastUpdate').textContent = date.toLocaleString('it-IT');
+                }
+
+                // Mostra banner successo
+                mostraStatus('success', `✓ ${tuttiBandi.length} bandi caricati dall'API`);
+
+                // Carica statistiche
+                caricaStatistiche();
+
+                // Mostra bandi
+                mostraBandi();
+
+            } catch (error) {
+                console.error('Errore caricamento bandi:', error);
+                mostraStatus('error', '✗ Errore connessione API. Assicurati che api_server.py sia attivo su localhost:5000');
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Carica statistiche
+        async function caricaStatistiche() {
+            try {
+                const response = await fetch(STATS_URL);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('statTotale').textContent = data.stats.totale;
+                    document.getElementById('statAperti').textContent = data.stats.aperti;
+                    document.getElementById('statScadenza').textContent = data.stats.in_scadenza;
+                }
+            } catch (error) {
+                console.error('Errore caricamento statistiche:', error);
+            }
+        }
+
+        // Mostra status banner
+        function mostraStatus(tipo, messaggio) {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const message = document.getElementById('statusMessage');
+
+            banner.className = `status-banner ${tipo}`;
+            icon.textContent = tipo === 'success' ? '✓' : '✗';
+            message.textContent = messaggio;
+            banner.style.display = 'flex';
+        }
+
+        // Mostra bandi
+        function mostraBandi() {
+            const container = document.getElementById('bandiContainer');
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+
+            loadingState.style.display = 'none';
+
+            if (bandiFiltrati.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.style.display = 'grid';
+            container.innerHTML = '';
+
+            bandiFiltrati.forEach(bando => {
+                const card = creaBandoCard(bando);
+                container.appendChild(card);
+            });
+        }
+
+        // Crea card bando
+        function creaBandoCard(bando) {
+            const card = document.createElement('div');
+            card.className = 'bando-card';
+
+            const categoria = bando.category || 'altro';
+            const regione = bando.region || 'N/D';
+            const scadenza = bando.deadline ? new Date(bando.deadline).toLocaleDateString('it-IT') : 'N/D';
+            
+            card.innerHTML = `
+                <div class="bando-header">
+                    <div>
+                        <div class="bando-title">${bando.title || 'Bando senza titolo'}</div>
+                        <div class="bando-meta">
+                            <span class="badge badge-category">${tradCategoria(categoria)}</span>
+                            <span class="badge badge-region">${regione}</span>
+                            <span class="badge badge-status">Scadenza: ${scadenza}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bando-description">
+                    ${(bando.description || 'Nessuna descrizione disponibile').substring(0, 200)}...
+                </div>
+                <div class="bando-footer">
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">
+                        Fonte: ${bando.entity || bando.source || 'N/D'}
+                    </div>
+                    <a href="${bando.url}" target="_blank" class="bando-link">Vedi dettagli →</a>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Traduci categoria
+        function tradCategoria(cat) {
+            const map = {
+                'lavoro': 'Lavoro',
+                'imprese': 'Imprese',
+                'immobili': 'Immobili',
+                'investimenti': 'Investimenti'
+            };
+            return map[cat] || cat;
+        }
+
+        // Applica filtri
+        function applicaFiltri() {
+            const categoria = document.getElementById('filterCategoria').value;
+            const regione = document.getElementById('filterRegione').value;
+            const searchText = document.getElementById('searchText').value.toLowerCase();
+
+            bandiFiltrati = tuttiBandi.filter(bando => {
+                if (categoria && bando.category !== categoria) return false;
+                if (regione && bando.region !== regione && bando.region !== 'nazionale') return false;
+                if (searchText) {
+                    const title = (bando.title || '').toLowerCase();
+                    const desc = (bando.description || '').toLowerCase();
+                    if (!title.includes(searchText) && !desc.includes(searchText)) return false;
+                }
+                return true;
+            });
+
+            mostraBandi();
+        }
+
+        // Reset filtri
+        function resetFiltri() {
+            document.getElementById('filterCategoria').value = '';
+            document.getElementById('filterRegione').value = '';
+            document.getElementById('searchText').value = '';
+            bandiFiltrati = [...tuttiBandi];
+            mostraBandi();
+        }
+
+        // Auto-refresh ogni 5 minuti
+        setInterval(() => {
+            caricaBandi();
+        }, 5 * 60 * 1000);
+
+        // Carica al caricamento pagina
+        window.addEventListener('DOMContentLoaded', caricaBandi);
+    </script>
+</body>
+</html>
