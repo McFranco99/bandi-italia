@@ -187,7 +187,7 @@ def aggiorna_bandi_background():
             print(f"❌ Errore generale scraping: {str(e)}")
         
         # Aspetta 30 minuti prima del prossimo aggiornamento
-        time.sleep(30 * 60)
+        time.sleep(1 * 60)
 
 def avvia_scraping_iniziale():
     """Esegui scraping iniziale all'avvio"""
