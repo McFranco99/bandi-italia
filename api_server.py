@@ -370,6 +370,23 @@ def debug_bandi_status():
             'error': str(e)
         })
 
+@app.route('/api/debug/scrape/<source>')
+def debug_scrape(source):
+    try:
+        if source == 'gazzetta' and GAZZETTA_AVAILABLE:
+            scraper = GazzettaScraper()
+            result = scraper.scrape_ultimi_30_giorni()
+        elif source == 'mimit' and MIMIT_AVAILABLE:
+            scraper = MIMITScraper()
+            result = scraper.scrape_incentivi()
+        elif source == 'invitalia' and INVITALIA_AVAILABLE:
+            scraper = InvitaliaScraper()
+            result = scraper.scrape_incentivi()
+        else:
+            return jsonify({'success': False, 'error': 'Scraper non disponibile'})
+        return jsonify({'success': True, 'count': len(result), 'sample': result[:3]})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     print("=== BOOT FLASK! Inizio log Python visibili ===")
