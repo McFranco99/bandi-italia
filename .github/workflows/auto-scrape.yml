@@ -1,0 +1,17 @@
+name: Auto Scrape Bandi
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Ogni ora all'inizio dell'ora
+  workflow_dispatch:     # Permette esecuzione manuale dal UI GitHub
+
+jobs:
+  scrape_bandi:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Call scrape endpoint
+      uses: fjogeleit/http-request-action@v1.3.0
+      with:
+        url: 'https://web-production-a261.up.railway.app/api/scrape/now'
+        method: GET
