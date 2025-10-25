@@ -11,7 +11,8 @@ flask-cors==4.0.0
 flask-jwt-extended==4.5.3
 fastapi==0.109.0
 uvicorn==0.25.0
-pydantic==2.5.3
+pydantic==1.10.13
+
 
 # Database
 psycopg2-binary==2.9.9
