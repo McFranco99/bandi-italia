@@ -54,8 +54,9 @@ bandi_cache = []
 ultimo_aggiornamento = None
 JSON_FILE = 'bandi_database_reale.json'
 
-def carica_bandi_da_json():
+
     """Carica bandi esistenti dal file JSON"""
+def carica_bandi_da_json():
     global bandi_cache
     print("=== [DEBUG] Avvio caricamento JSON Bandi ===")
     print(f"=== [DEBUG] Cerco file: {JSON_FILE}, esiste? {os.path.exists(JSON_FILE)} ===")
