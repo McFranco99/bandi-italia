@@ -55,7 +55,7 @@ ultimo_aggiornamento = None
 JSON_FILE = 'bandi_database_reale.json'
 
 
-    """Carica bandi esistenti dal file JSON"""
+
 def carica_bandi_da_json():
     global bandi_cache
     print("=== [DEBUG] Avvio caricamento JSON Bandi ===")
@@ -73,6 +73,7 @@ def carica_bandi_da_json():
     except Exception as e:
         print(f"⚠️ Errore caricamento JSON: {e}")
     return False
+
 
 
 def salva_bandi_su_json():
@@ -358,7 +359,7 @@ if __name__ == '__main__':
     avvia_scraping_iniziale()
     
     # Avvia thread scraping automatico
-    avvia_thread_scraping()
+    #avvia_thread_scraping()
     
     print("\n" + "="*70)
     print("✅ SERVER PRONTO!")
