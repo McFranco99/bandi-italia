@@ -391,7 +391,7 @@ if __name__ == '__main__':
     avvia_scraping_iniziale()
     
     # Avvia thread scraping automatico
-    #avvia_thread_scraping()
+    avvia_thread_scraping()
     
     print("\n" + "="*70)
     print("✅ SERVER PRONTO!")
