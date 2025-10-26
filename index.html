@@ -1,566 +1,695 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>🇮🇹 Bandi Italia - Aggregatore Nazionale</title>
-    <style>
-        :root {
-            --color-bg: #fcfcf9;
-            --color-surface: #fffffe;
-            --color-text: #13343b;
-            --color-text-secondary: #626c71;
-            --color-primary: #21808d;
-            --color-primary-hover: #1d7480;
-            --color-border: rgba(94, 82, 64, 0.2);
-            --color-error: #c0152f;
-            --color-success: #21808d;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-bg: #1f2121;
-                --color-surface: #262828;
-                --color-text: #f5f5f5;
-                --color-text-secondary: rgba(167, 169, 169, 0.7);
-                --color-primary: #32b8c6;
-                --color-primary-hover: #2da6b2;
-                --color-border: rgba(119, 124, 124, 0.3);
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--color-bg);
-            color: var(--color-text);
-            line-height: 1.6;
-        }
-
-        .header {
-            background: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--color-primary);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .status-banner {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-banner.error {
-            border-color: var(--color-error);
-            background: rgba(192, 21, 47, 0.1);
-        }
-
-        .status-banner.success {
-            border-color: var(--color-success);
-            background: rgba(33, 128, 141, 0.1);
-        }
-
-        .filters {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--color-text);
-        }
-
-        select, input {
-            padding: 10px 12px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            background: var(--color-surface);
-            color: var(--color-text);
-            font-size: 14px;
-        }
-
-        select:focus, input:focus {
-            outline: 2px solid var(--color-primary);
-            border-color: var(--color-primary);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--color-primary-hover);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--color-border);
-            color: var(--color-text);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--color-text-secondary);
-        }
-
-        .bandi-grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .bando-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.2s;
-        }
-
-        .bando-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .bando-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 12px;
-        }
-
-        .bando-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--color-text);
-            margin-bottom: 8px;
-        }
-
-        .bando-meta {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .badge-category {
-            background: rgba(33, 128, 141, 0.1);
-            color: var(--color-primary);
-        }
-
-        .badge-region {
-            background: rgba(94, 82, 64, 0.1);
-            color: var(--color-text-secondary);
-        }
-
-        .badge-status {
-            background: rgba(33, 128, 141, 0.15);
-            color: var(--color-success);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--color-text-secondary);
-        }
-
-        .spinner {
-            border: 3px solid var(--color-border);
-            border-top: 3px solid var(--color-primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--color-text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🇮🇹 Bandi Italia - Aggregatore Nazionale</title>
+<style>
+:root {
+  --color-white: rgba(255, 255, 255, 1);
+  --color-black: rgba(0, 0, 0, 1);
+  --color-cream-50: rgba(252, 252, 249, 1);
+  --color-cream-100: rgba(255, 255, 253, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-charcoal-700: rgba(31, 33, 33, 1);
+  --color-charcoal-800: rgba(38, 40, 40, 1);
+  --color-slate-900: rgba(19, 52, 59, 1);
+  --color-teal-300: rgba(50, 184, 198, 1);
+  --color-teal-400: rgba(45, 166, 178, 1);
+  --color-teal-500: rgba(33, 128, 141, 1);
+  --color-teal-600: rgba(29, 116, 128, 1);
+  --color-teal-700: rgba(26, 104, 115, 1);
+  --color-red-400: rgba(255, 84, 89, 1);
+  --color-red-500: rgba(192, 21, 47, 1);
+  --color-orange-400: rgba(230, 129, 97, 1);
+  --color-orange-500: rgba(168, 75, 47, 1);
+  --color-brown-600-rgb: 94, 82, 64;
+  --color-teal-500-rgb: 33, 128, 141;
+  --color-slate-900-rgb: 19, 52, 59;
+  --color-slate-500-rgb: 98, 108, 113;
+  --color-background: var(--color-cream-50);
+  --color-surface: var(--color-cream-100);
+  --color-text: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-500);
+  --color-primary: var(--color-teal-500);
+  --color-primary-hover: var(--color-teal-600);
+  --color-primary-active: var(--color-teal-700);
+  --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-btn-primary-text: var(--color-cream-50);
+  --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-success: var(--color-teal-500);
+  --color-error: var(--color-red-500);
+  --color-warning: var(--color-orange-500);
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-gray-400-rgb: 119, 124, 124;
+    --color-teal-300-rgb: 50, 184, 198;
+    --color-gray-300-rgb: 167, 169, 169;
+    --color-gray-200-rgb: 245, 245, 245;
+    --color-background: var(--color-charcoal-700);
+    --color-surface: var(--color-charcoal-800);
+    --color-text: var(--color-gray-200);
+    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+    --color-primary: var(--color-teal-300);
+    --color-primary-hover: var(--color-teal-400);
+    --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
+    --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
+    --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-error: var(--color-red-400);
+    --color-success: var(--color-teal-300);
+    --color-warning: var(--color-orange-400);
+    --color-btn-primary-text: var(--color-slate-900);
+    --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.5;
+  font-size: var(--font-size-base);
+}
+.header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-card-border);
+  padding: var(--space-24) var(--space-16);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.logo {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--space-8);
+}
+.tagline {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-24) var(--space-16);
+}
+.filters {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  margin-bottom: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+.filters h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-16);
+  color: var(--color-text);
+}
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+.filter-select, .search-input {
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+.filter-select:focus, .search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.search-box {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-16);
+}
+.search-input {
+  flex: 1;
+}
+.btn {
+  padding: var(--space-8) var(--space-20);
+  border: none;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-btn-primary-text);
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+.btn-secondary:hover {
+  background-color: var(--color-secondary-hover);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-16);
+  margin-bottom: var(--space-32);
+}
+.stat-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.stat-number {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--space-8);
+}
+.stat-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+.bandi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--space-24);
+}
+.bando-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-normal) var(--ease-standard);
+  display: flex;
+  flex-direction: column;
+}
+.bando-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.bando-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-16);
+  gap: var(--space-12);
+}
+.bando-category {
+  display: inline-block;
+  padding: var(--space-4) var(--space-12);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+.category-immobili {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.category-imprese {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.category-lavoro {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #6b21a8;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+.category-generale {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.bando-status {
+  padding: var(--space-4) var(--space-12);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+.status-aperto {
+  background-color: rgba(var(--color-teal-500-rgb), 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(var(--color-teal-500-rgb), 0.25);
+}
+.status-scadenza {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.status-chiuso {
+  background-color: rgba(var(--color-slate-500-rgb), 0.15);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(var(--color-slate-500-rgb), 0.25);
+}
+.bando-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-12);
+  line-height: 1.3;
+}
+.bando-ente {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-16);
+  font-weight: var(--font-weight-medium);
+}
+.bando-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  margin-bottom: var(--space-16);
+  line-height: 1.6;
+  flex: 1;
+}
+.bando-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--color-card-border);
+}
+.bando-detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+.detail-label {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+.detail-value {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+.bando-actions {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+}
+.btn-small {
+  padding: var(--space-8) var(--space-16);
+  font-size: var(--font-size-sm);
+  flex: 1;
+}
+.no-results {
+  text-align: center;
+  padding: var(--space-32);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+}
+.footer {
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-card-border);
+  padding: var(--space-32) var(--space-16);
+  margin-top: var(--space-32);
+}
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+.footer-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-16);
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-24);
+  flex-wrap: wrap;
+}
+.footer-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.footer-link:hover {
+  color: var(--color-primary-hover);
+}
+@media (max-width: 768px) {
+  .bandi-grid {
+    grid-template-columns: 1fr;
+  }
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">🇮🇹 Bandi Italia</div>
-            <div style="font-size: 12px; color: var(--color-text-secondary);">
-                Ultimo aggiornamento: <span id="lastUpdate">Caricamento...</span>
-            </div>
-        </div>
-    </header>
+<header class="header">
+  <div class="header-content">
+    <h1 class="logo">🇮🇹 Bandi Italia</h1>
+    <p class="tagline">Aggregatore nazionale di bandi per immobili, imprese, lavoro e investimenti</p>
+  </div>
+</header>
 
-    <div class="container">
-        <!-- Status Banner -->
-        <div id="statusBanner" class="status-banner success" style="display: none;">
-            <span id="statusIcon">✓</span>
-            <span id="statusMessage">Connesso all'API</span>
-        </div>
-
-        <!-- Filtri -->
-        <div class="filters">
-            <h3 style="margin-bottom: 16px;">🔍 Cerca Bandi</h3>
-            <div class="filter-row">
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <select id="filterCategoria">
-                        <option value="">Tutte le categorie</option>
-                        <option value="lavoro">Lavoro e Concorsi</option>
-                        <option value="imprese">Imprese e Innovazione</option>
-                        <option value="immobili">Immobili e Aste</option>
-                        <option value="investimenti">Investimenti e Startup</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Regione</label>
-                    <select id="filterRegione">
-                        <option value="">Tutte le regioni</option>
-                        <option value="nazionale">Nazionale</option>
-                        <option value="lombardia">Lombardia</option>
-                        <option value="lazio">Lazio</option>
-                        <option value="veneto">Veneto</option>
-                        <option value="piemonte">Piemonte</option>
-                        <option value="toscana">Toscana</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fonte</label>
-                    <select id="filterFonte">
-                        <option value="">Tutte le fonti</option>
-                        <option value="inpa">InPA</option>
-                        <option value="gazzetta">Gazzetta</option>
-                        <option value="invitalia">Invitalia</option>
-                        <option value="mimit">MIMIT</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Ricerca testuale</label>
-                    <input type="text" id="searchText" placeholder="Cerca per titolo o descrizione...">
-                </div>
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="applicaFiltri()">Cerca</button>
-                <button class="btn btn-secondary" onclick="resetFiltri()">Reset</button>
-            </div>
-        </div>
-
-        <!-- Statistiche -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="statTotale">0</div>
-                <div class="stat-label">Bandi Trovati</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statAperti">0</div>
-                <div class="stat-label">Bandi Aperti</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statScadenza">0</div>
-                <div class="stat-label">In Scadenza</div>
-            </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="loading">
-            <div class="spinner"></div>
-            <div>Caricamento bandi in corso...</div>
-        </div>
-
-        <!-- Lista Bandi -->
-        <div id="bandiContainer" class="bandi-grid" style="display: none;"></div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <div class="empty-state-icon">📭</div>
-            <h3>Nessun bando trovato</h3>
-            <p>Prova a modificare i filtri di ricerca</p>
-        </div>
+<main class="container">
+  <section class="filters">
+    <h2>Filtra i bandi</h2>
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label class="filter-label" for="categoria">Categoria</label>
+        <select id="categoria" class="filter-select">
+          <option value="">Tutte le categorie</option>
+          <option value="immobili">Immobili</option>
+          <option value="imprese">Imprese e Investimenti</option>
+          <option value="lavoro">Lavoro e Concorsi</option>
+          <option value="generale">Generale</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="regione">Regione</label>
+        <select id="regione" class="filter-select">
+          <option value="">Tutte le regioni</option>
+          <option value="nazionale">Nazionale</option>
+          <option value="piemonte">Piemonte</option>
+          <option value="lombardia">Lombardia</option>
+          <option value="veneto">Veneto</option>
+          <option value="emilia-romagna">Emilia-Romagna</option>
+          <option value="toscana">Toscana</option>
+          <option value="lazio">Lazio</option>
+          <option value="campania">Campania</option>
+          <option value="sicilia">Sicilia</option>
+          <option value="altre">Altre regioni</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="stato">Stato</label>
+        <select id="stato" class="filter-select">
+          <option value="">Tutti gli stati</option>
+          <option value="aperto">Aperto</option>
+          <option value="scadenza">In scadenza</option>
+          <option value="chiuso">Chiuso</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="ente">Ente</label>
+        <select id="ente" class="filter-select">
+          <option value="">Tutti gli enti</option>
+          <option value="demanio">Agenzia del Demanio</option>
+          <option value="mimit">MIMIT</option>
+          <option value="regione">Regioni</option>
+          <option value="invitalia">Invitalia</option>
+          <option value="inpa">INPA</option>
+          <option value="altro">Altri enti</option>
+        </select>
+      </div>
     </div>
+    <div class="search-box">
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Cerca per parola chiave (es. 'digitale', 'casa montagna', 'startup')..."
+      />
+      <button class="btn btn-primary" onclick="applicaFiltri()">Cerca</button>
+      <button class="btn btn-secondary" onclick="resetFiltri()">Reset</button>
+    </div>
+  </section>
 
-    <script>
-        const API_URL = 'https://web-production-a261.up.railway.app/api/bandi';
-        const STATS_URL = 'https://web-production-a261.up.railway.app/api/stats';
+  <section class="stats">
+    <div class="stat-card">
+      <div class="stat-number" id="totaleBandi">0</div>
+      <div class="stat-label">Bandi totali</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="bandiAperti">0</div>
+      <div class="stat-label">Bandi aperti</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="scadenzaImminente">0</div>
+      <div class="stat-label">In scadenza</div>
+    </div>
+  </section>
 
-        let tuttiBandi = [];
-        let bandiFiltrati = [];
+  <section id="bandiContainer" class="bandi-grid no-results">Nessun bando trovato.</section>
+</main>
 
-        // Carica bandi dall'API
-        async function caricaBandi() {
-            try {
-                document.getElementById('loadingState').style.display = 'block';
-                document.getElementById('bandiContainer').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'none';
+<footer class="footer">
+  <div class="footer-content">
+    <p class="footer-text">
+      Bandi Italia - Aggregatore nazionale di bandi e incentivi • Aggiornato al 25 ottobre 2025
+    </p>
+    <div class="footer-links">
+      <a href="https://www.agenziademanio.it" class="footer-link" target="_blank" rel="noopener noreferrer">Agenzia del Demanio</a>
+      <a href="https://www.mimit.gov.it" class="footer-link" target="_blank" rel="noopener noreferrer">MIMIT</a>
+      <a href="https://www.inpa.gov.it" class="footer-link" target="_blank" rel="noopener noreferrer">INPA</a>
+      <a href="https://www.invitalia.it" class="footer-link" target="_blank" rel="noopener noreferrer">Invitalia</a>
+    </div>
+  </div>
+</footer>
 
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('API non disponibile');
+<script>
+const API_URL = "https://web-production-a261.up.railway.app/api/bandi";
+const STATS_URL = "https://web-production-a261.up.railway.app/api/stats";
 
-                const data = await response.json();
-                tuttiBandi = (data.bandi || []).map(b => {
-                    b.source = (b.source || b.entity || 'altro').toLowerCase();
-                    return b;
-                });
-                bandiFiltrati = [...tuttiBandi];
+let tuttiBandi = [];
+let bandiFiltrati = [];
 
-                if (data.ultimo_aggiornamento) {
-                    const date = new Date(data.ultimo_aggiornamento);
-                    document.getElementById('lastUpdate').textContent = date.toLocaleString('it-IT');
-                }
+// Funzione per aggiornare le statistiche in pagina
+function aggiornaStatistiche() {
+  document.getElementById("totaleBandi").textContent = bandiFiltrati.length;
+  document.getElementById("bandiAperti").textContent = bandiFiltrati.filter(b => b.stato === "aperto").length;
+  document.getElementById("scadenzaImminente").textContent = bandiFiltrati.filter(b => b.stato === "scadenza").length;
+}
 
-                mostraStatus('success', `✓ ${tuttiBandi.length} bandi caricati dall'API`);
-                caricaStatistiche();
-                mostraBandi();
-            } catch (error) {
-                console.error('Errore caricamento bandi:', error);
-                mostraStatus('error', '✗ Errore connessione API. Verifica che la tua API sia attiva online.');
-                document.getElementById('loadingState').style.display = 'none';
-            }
-        }
+// Funzione di rendering bandi in lista
+function renderBandi(bandi) {
+  const container = document.getElementById("bandiContainer");
+  if (!bandi.length) {
+    container.innerHTML = '<div class="no-results">Nessun bando trovato con i filtri selezionati.</div>';
+    return;
+  }
+  container.innerHTML = bandi.map(bando => `
+    <article class="bando-card">
+      <div class="bando-header">
+        <span class="bando-category category-${bando.categoria}">${getCategoriaLabel(bando.categoria)}</span>
+        <span class="bando-status status-${bando.stato}">${getStatoLabel(bando.stato)}</span>
+      </div>
+      <h3 class="bando-title">${bando.titolo}</h3>
+      <div class="bando-ente">🏛️ ${bando.ente}</div>
+      <p class="bando-description">${bando.descrizione}</p>
+      <div class="bando-details">
+        <div class="bando-detail-item">
+          <span class="detail-label">Regione</span>
+          <span class="detail-value">${getRegioneLabel(bando.regione)}</span>
+        </div>
+        <div class="bando-detail-item">
+          <span class="detail-label">Scadenza</span>
+          <span class="detail-value">${bando.scadenza}</span>
+        </div>
+        <div class="bando-detail-item">
+          <span class="detail-label">Importo</span>
+          <span class="detail-value">${bando.importo}</span>
+        </div>
+      </div>
+      <div class="bando-actions">
+        <a class="btn btn-primary btn-small" href="${bando.link}" target="_blank" rel="noopener noreferrer">Vai al bando</a>
+      </div>
+    </article>
+  `).join('');
+}
 
-        // Carica statistiche
-        async function caricaStatistiche() {
-            try {
-                const response = await fetch(STATS_URL);
-                const data = await response.json();
+// Helper etichette
+function getCategoriaLabel(categoria) {
+  const labels = {
+    immobili: "Immobili",
+    imprese: "Imprese e Investimenti",
+    lavoro: "Lavoro e Concorsi",
+    generale: "Generale"
+  };
+  return labels[categoria] || categoria;
+}
+function getStatoLabel(stato) {
+  const labels = {
+    aperto: "Aperto",
+    scadenza: "In scadenza",
+    chiuso: "Chiuso"
+  };
+  return labels[stato] || stato;
+}
+function getRegioneLabel(regione) {
+  const labels = {
+    nazionale: "Nazionale",
+    piemonte: "Piemonte",
+    lombardia: "Lombardia",
+    veneto: "Veneto",
+    "emilia-romagna": "Emilia-Romagna",
+    toscana: "Toscana",
+    lazio: "Lazio",
+    campania: "Campania",
+    sicilia: "Sicilia",
+    altre: "Altre regioni"
+  };
+  return labels[regione] || regione;
+}
 
-                if (data.success) {
-                    document.getElementById('statTotale').textContent = data.stats.totale;
-                    document.getElementById('statAperti').textContent = data.stats.aperti;
-                    document.getElementById('statScadenza').textContent = data.stats.in_scadenza;
-                }
-            } catch (error) {
-                console.error('Errore caricamento statistiche:', error);
-            }
-        }
+// Funzione per controllo filtro ente (gestione stringhe parti di nome)
+function matchEnteFilter(enteCompleto, filtroEnte) {
+  const mappingEnti = {
+    demanio: ["demanio"],
+    mimit: ["mimit"],
+    regione: ["regione"],
+    invitalia: ["invitalia"],
+    inpa: ["inpa"]
+  };
+  if (filtroEnte === "altro") {
+    return !Object.values(mappingEnti).flat().some(keyword =>
+      enteCompleto.toLowerCase().includes(keyword)
+    );
+  }
+  const keywords = mappingEnti[filtroEnte] || [];
+  return keywords.some(keyword => enteCompleto.toLowerCase().includes(keyword));
+}
 
-        // Mostra status banner
-        function mostraStatus(tipo, messaggio) {
-            const banner = document.getElementById('statusBanner');
-            const icon = document.getElementById('statusIcon');
-            const message = document.getElementById('statusMessage');
+// Applica filtri di ricerca selezionati
+function applicaFiltri() {
+  const categoria = document.getElementById("categoria").value;
+  const regione = document.getElementById("regione").value;
+  const stato = document.getElementById("stato").value;
+  const ente = document.getElementById("ente").value;
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
 
-            banner.className = `status-banner ${tipo}`;
-            icon.textContent = tipo === 'success' ? '✓' : '✗';
-            message.textContent = messaggio;
-            banner.style.display = 'flex';
-        }
+  bandiFiltrati = tuttiBandi.filter(bando => {
+    const matchCategoria = !categoria || bando.categoria === categoria;
+    const matchRegione = !regione || bando.regione === regione;
+    const matchStato = !stato || bando.stato === stato;
+    const matchEnte = !ente || matchEnteFilter(bando.ente, ente);
+    const matchSearch =
+      !searchTerm ||
+      bando.titolo.toLowerCase().includes(searchTerm) ||
+      bando.descrizione.toLowerCase().includes(searchTerm) ||
+      bando.ente.toLowerCase().includes(searchTerm);
+    return matchCategoria && matchRegione && matchStato && matchEnte && matchSearch;
+  });
+  aggiornaStatistiche();
+  renderBandi(bandiFiltrati);
+}
 
-        // Mostra bandi
-        function mostraBandi() {
-            const container = document.getElementById('bandiContainer');
-            const emptyState = document.getElementById('emptyState');
-            const loadingState = document.getElementById('loadingState');
+// Resetta filtri e mostra tutti i bandi
+function resetFiltri() {
+  document.getElementById("categoria").value = "";
+  document.getElementById("regione").value = "";
+  document.getElementById("stato").value = "";
+  document.getElementById("ente").value = "";
+  document.getElementById("searchInput").value = "";
+  bandiFiltrati = [...tuttiBandi];
+  aggiornaStatistiche();
+  renderBandi(bandiFiltrati);
+}
 
-            loadingState.style.display = 'none';
+// Carica i dati reali da API
+async function caricaBandi() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error("API non disponibile");
+    const data = await response.json();
 
-            if (bandiFiltrati.length === 0) {
-                container.style.display = 'none';
-                emptyState.style.display = 'block';
-                return;
-            }
+    // Normalizza dati, soprattutto ente come minuscolo
+    tuttiBandi = (data.bandi || []).map(b => {
+      b.ente = (b.ente || b.source || "altro").toLowerCase();
+      // Mantieni anche proprietà come titolo, stato, ecc
+      // Adatta qui se necessario per allineare i campi ai dati API
+      return b;
+    });
+    bandiFiltrati = [...tuttiBandi];
+    aggiornaStatistiche();
+    renderBandi(bandiFiltrati);
 
-            emptyState.style.display = 'none';
-            container.style.display = 'grid';
-            container.innerHTML = '';
+    if (data.ultimo_aggiornamento) {
+      const date = new Date(data.ultimo_aggiornamento);
+      document.getElementById("lastUpdate").textContent = date.toLocaleString("it-IT");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Errore caricamento bandi da API.");
+  }
+}
 
-            bandiFiltrati.forEach(bando => {
-                const card = creaBandoCard(bando);
-                container.appendChild(card);
-            });
-        }
+document.addEventListener("DOMContentLoaded", () => {
+  caricaBandi();
 
-        // Crea card bando
-        function creaBandoCard(bando) {
-            const card = document.createElement('div');
-            card.className = 'bando-card';
-
-            const categoria = bando.category || 'altro';
-            const regione = bando.region || 'N/D';
-            const scadenza = bando.deadline ? new Date(bando.deadline).toLocaleDateString('it-IT') : 'N/D';
-            const fonte = bando.source || bando.entity || 'N/D';
-
-            const colorMap = {
-                'inpa': '#0d6efd',
-                'gazzetta': '#198754',
-                'invitalia': '#ffc107',
-                'mimit': '#dc3545'
-            };
-            const badgeColor = colorMap[fonte] || '#6c757d';
-
-            card.innerHTML = `
-                <div class="bando-header">
-                    <div>
-                        <div class="bando-title">${bando.title || bando.titolo || 'Bando senza titolo'}</div>
-                        <div class="bando-meta">
-                            <span class="badge badge-category">${tradCategoria(categoria)}</span>
-                            <span class="badge badge-region">${regione}</span>
-                            <span class="badge badge-status">Scadenza: ${scadenza}</span>
-                            <span class="badge" style="background-color:${badgeColor};color:white;">${fonte}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="bando-description">
-                    ${(bando.description || bando.descrizione || 'Nessuna descrizione disponibile').substring(0, 200)}...
-                </div>
-                <div class="bando-footer">
-                    <div style="font-size: 12px; color: var(--color-text-secondary);">
-                        Fonte dettagliata: ${fonte}
-                    </div>
-                    <a href="${bando.url}" target="_blank" class="bando-link">Vedi dettagli →</a>
-                </div>
-            `;
-
-            return card;
-        }
-
-        // Traduci categoria
-        function tradCategoria(cat) {
-            const map = {
-                'lavoro': 'Lavoro',
-                'imprese': 'Imprese',
-                'immobili': 'Immobili',
-                'investimenti': 'Investimenti'
-            };
-            return map[cat] || cat;
-        }
-
-        // Applica filtri
-        function applicaFiltri() {
-            const categoria = document.getElementById('filterCategoria').value;
-            const regione = document.getElementById('filterRegione').value;
-            const fonte = document.getElementById('filterFonte').value.toLowerCase();
-            const searchText = document.getElementById('searchText').value.toLowerCase();
-
-            bandiFiltrati = tuttiBandi.filter(bando => {
-                if (categoria && bando.category !== categoria) return false;
-                if (regione && bando.region !== regione && bando.region !== 'nazionale') return false;
-                if (fonte && bando.source !== fonte) return false;
-                if (searchText) {
-                    const title = (bando.title || bando.titolo || '').toLowerCase();
-                    const desc = (bando.description || bando.descrizione || '').toLowerCase();
-                    if (!title.includes(searchText) && !desc.includes(searchText)) return false;
-                }
-                return true;
-            });
-
-            mostraBandi();
-        }
-
-        // Reset filtri
-        function resetFiltri() {
-            document.getElementById('filterCategoria').value = '';
-            document.getElementById('filterRegione').value = '';
-            document.getElementById('filterFonte').value = '';
-            document.getElementById('searchText').value = '';
-            bandiFiltrati = [...tuttiBandi];
-            mostraBandi();
-        }
-
-        // Auto-refresh ogni 5 minuti
-        setInterval(() => {
-            caricaBandi();
-        }, 5 * 60 * 1000);
-
-        // Carica al caricamento pagina
-        window.addEventListener('DOMContentLoaded', caricaBandi);
-    </script>
+  // Barra ricerca con Enter
+  document.getElementById("searchInput").addEventListener("keyup", e => {
+    if (e.key === "Enter") applicaFiltri();
+  });
+});
+</script>
 </body>
 </html>
