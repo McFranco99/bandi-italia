@@ -355,32 +355,4 @@ def debug_scrape(source):
         return jsonify({'success': False, 'error': str(e)})
 
 
-if __name__ == '__main__':
-    print("=== BOOT FLASK! Inizio log Python visibili ===")
-    print("\n" + "="*70)
-    print("🚀 API SERVER BANDI ITALIA - 4 SCRAPER INTEGRATI")
-    print("="*70)
-    print("📌 Salvataggio: File JSON (bandi_database_reale.json)")
-    print("📌 Porta: 5000")
-    print("📌 CORS: Abilitato")
-    print("="*70 + "\n")
-    
-    # Esegui setup iniziale
-    avvia_scraping_iniziale()
-    
-    # Avvia thread scraping automatico
-    avvia_thread_scraping()
-    
-    print("\n" + "="*70)
-    print("✅ SERVER PRONTO!")
-    print("="*70)
-    print("🌐 API disponibile su: http://localhost:5000/api/bandi")
-    print("🏠 Frontend disponibile su: http://localhost:5000/")
-    print("📊 Statistiche: http://localhost:5000/api/stats")
-    print("🔧 Health check: http://localhost:5000/api/health")
-    print("="*70 + "\n")
-    
-    # Avvia server Flask
-    print("\n=== BOOT FLASK in modalità locale ===\n")
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
+
