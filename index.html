@@ -576,7 +576,7 @@ function renderBandi(bandi) {
     const regione = getRegioneLabel(bando.regione || bando.region);
     const scadenza = bando.scadenza || bando.deadline || "N/D";
     const importo = bando.importo || bando.amount || "N/D";
-    const link = bando.link || bando.url || "#";
+    const link = (bando.link || bando.url || "#").replace(/^http:\/\//i, "https://");
     return `
       <article class="bando-card">
         <div class="bando-header">
