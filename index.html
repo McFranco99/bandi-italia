@@ -630,24 +630,53 @@ function resetFiltri() {
 }
 async function caricaBandi() {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) throw new Error("API non disponibile");
-    const data = await response.json();
-    tuttiBandi = (data.bandi || []).map(b => {
-      b.ente = (b.ente || b.source || "altro").toLowerCase();
-      return b;
-    });
+    const res = await fetch("/api/bandi");
+    if (!res.ok) throw new Error("API non disponibile");
+    const data = await res.json();
+
+    // Accetta sia array puro che oggetto { bandi: [...] } o { items: [...] }
+    const items = Array.isArray(data) ? data : (data.bandi || data.items || []);
+    // Fallback extra: se non arriva niente dall’API ma esiste il DB locale nel file
+    const list = (items && items.length) ? items : (typeof bandiDatabase !== "undefined" ? bandiDatabase : []);
+
+    tuttiBandi = list.map(b => ({
+      ...b,
+      // normalizzazioni e fallback campi
+      titolo: b.titolo || b.title || "Bando senza titolo",
+      categoria: b.categoria || b.category || "generale",
+      regione: b.regione || b.region || "nazionale",
+      ente: (b.ente || b.entity || b.source || "altro").toLowerCase(),
+      scadenza: b.scadenza || b.deadline || "N/D",
+      importo: b.importo || b.amount || 0,
+      link: b.link || b.url || "#",
+      stato: b.stato || b.status || "aperto",
+      descrizione: b.descrizione || b.description || ""
+    }));
+
     bandiFiltrati = [...tuttiBandi];
     aggiornaStatistiche();
     renderBandi(bandiFiltrati);
-  } catch (error) {
-    console.error(error);
-    alert("Errore caricamento bandi da API.");
+  } catch (e) {
+    console.error(e);
+    // Fallback a DB locale se l’API fallisce
+    if (typeof bandiDatabase !== "undefined") {
+      tuttiBandi = bandiDatabase.map(b => ({
+        ...b,
+        titolo: b.titolo || b.title || "Bando senza titolo",
+        categoria: b.categoria || b.category || "generale",
+        regione: b.regione || b.region || "nazionale",
+        ente: (b.ente || b.entity || b.source || "altro").toLowerCase(),
+        scadenza: b.scadenza || b.deadline || "N/D",
+        importo: b.importo || b.amount || 0,
+        link: b.link || b.url || "#",
+        stato: b.stato || b.status || "aperto",
+        descrizione: b.descrizione || b.description || ""
+      }));
+      bandiFiltrati = [...tuttiBandi];
+      aggiornaStatistiche();
+      renderBandi(bandiFiltrati);
+    } else {
+      alert("Errore caricamento bandi da API.");
+    }
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
-  caricaBandi();
-  document.getElementById("searchInput").addEventListener("keyup", e => {
-    if (e.key === "Enter") applicaFiltri();
-  });
-});
