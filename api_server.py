@@ -51,12 +51,19 @@ from flask import redirect, request
 
 @app.before_request
 def force_https_and_www():
-    url = request.url
-    if not request.is_secure or not request.host.startswith("www."):
-        secure_url = url.replace("http://", "https://")
-        if not request.host.startswith("www."):
-            secure_url = secure_url.replace(request.host, f"www.{request.host}")
+    forwarded_proto = request.headers.get("X-Forwarded-Proto", "http")
+    host = request.host
+
+    # forza HTTPS solo se non già in https
+    if forwarded_proto != "https":
+        secure_url = request.url.replace("http://", "https://")
         return redirect(secure_url, code=301)
+
+    # forza www solo se mancante
+    if not host.startswith("www."):
+        secure_url = request.url.replace(host, f"www.{host}")
+        return redirect(secure_url, code=301)
+
 CORS(app)
 
 bandi_cache = []
