@@ -326,10 +326,10 @@
                     <label>Fonte</label>
                     <select id="filterFonte">
                         <option value="">Tutte le fonti</option>
-                        <option value="InPA">InPA</option>
-                        <option value="Gazzetta">Gazzetta</option>
-                        <option value="Invitalia">Invitalia</option>
-                        <option value="MIMIT">MIMIT</option>
+                        <option value="inpa">InPA</option>
+                        <option value="gazzetta">Gazzetta</option>
+                        <option value="invitalia">Invitalia</option>
+                        <option value="mimit">MIMIT</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -380,7 +380,6 @@
         const API_URL = 'https://web-production-a261.up.railway.app/api/bandi';
         const STATS_URL = 'https://web-production-a261.up.railway.app/api/stats';
 
-        
         let tuttiBandi = [];
         let bandiFiltrati = [];
 
@@ -393,26 +392,22 @@
 
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('API non disponibile');
-                
+
                 const data = await response.json();
-                tuttiBandi = data.bandi || [];
+                tuttiBandi = (data.bandi || []).map(b => {
+                    b.source = (b.source || b.entity || 'altro').toLowerCase();
+                    return b;
+                });
                 bandiFiltrati = [...tuttiBandi];
 
-                // Aggiorna timestamp
                 if (data.ultimo_aggiornamento) {
                     const date = new Date(data.ultimo_aggiornamento);
                     document.getElementById('lastUpdate').textContent = date.toLocaleString('it-IT');
                 }
 
-                // Mostra banner successo
                 mostraStatus('success', `✓ ${tuttiBandi.length} bandi caricati dall'API`);
-
-                // Carica statistiche
                 caricaStatistiche();
-
-                // Mostra bandi
                 mostraBandi();
-
             } catch (error) {
                 console.error('Errore caricamento bandi:', error);
                 mostraStatus('error', '✗ Errore connessione API. Verifica che la tua API sia attiva online.');
@@ -425,7 +420,7 @@
             try {
                 const response = await fetch(STATS_URL);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     document.getElementById('statTotale').textContent = data.stats.totale;
                     document.getElementById('statAperti').textContent = data.stats.aperti;
@@ -483,10 +478,10 @@
             const fonte = bando.source || bando.entity || 'N/D';
 
             const colorMap = {
-                'InPA': '#0d6efd',
-                'Gazzetta': '#198754',
-                'Invitalia': '#ffc107',
-                'MIMIT': '#dc3545'
+                'inpa': '#0d6efd',
+                'gazzetta': '#198754',
+                'invitalia': '#ffc107',
+                'mimit': '#dc3545'
             };
             const badgeColor = colorMap[fonte] || '#6c757d';
 
@@ -531,7 +526,7 @@
         function applicaFiltri() {
             const categoria = document.getElementById('filterCategoria').value;
             const regione = document.getElementById('filterRegione').value;
-            const fonte = document.getElementById('filterFonte').value;
+            const fonte = document.getElementById('filterFonte').value.toLowerCase();
             const searchText = document.getElementById('searchText').value.toLowerCase();
 
             bandiFiltrati = tuttiBandi.filter(bando => {
