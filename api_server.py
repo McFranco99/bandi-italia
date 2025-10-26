@@ -7,71 +7,77 @@ import threading
 import time
 import sys
 
-# Import degli scraper
+# ========================
+# 🔧 CONFIGURAZIONE BASE
+# ========================
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Scraper InPA
+# Scraper disponibili
 try:
     from inpa_scraper import InPAScraper
     INPA_AVAILABLE = True
-except:
+except Exception as e:
     INPA_AVAILABLE = False
-    print("⚠️ InPAScraper non disponibile")
+    print(f"⚠️ InPAScraper non disponibile: {e}")
 
-# Scraper Gazzetta Ufficiale
 try:
     from gazzetta_scraper import GazzettaScraper
     GAZZETTA_AVAILABLE = True
-except:
+except Exception as e:
     GAZZETTA_AVAILABLE = False
-    print("⚠️ GazzettaScraper non disponibile")
+    print(f"⚠️ GazzettaScraper non disponibile: {e}")
 
-# Scraper MIMIT
 try:
     from mimit_scraper import MIMITScraper
     MIMIT_AVAILABLE = True
-except:
+except Exception as e:
     MIMIT_AVAILABLE = False
-    print("⚠️ MIMITScraper non disponibile")
+    print(f"⚠️ MIMITScraper non disponibile: {e}")
 
-# Scraper Invitalia
 try:
     from invitalia_scraper import InvitaliaScraper
     INVITALIA_AVAILABLE = True
-except:
+except Exception as e:
     INVITALIA_AVAILABLE = False
-    print("⚠️ InvitaliaScraper non disponibile")
+    print(f"⚠️ InvitaliaScraper non disponibile: {e}")
+
+# ========================
+# 🚀 INIZIALIZZAZIONE APP
+# ========================
 
 app = Flask(__name__)
 CORS(app)
 
 bandi_cache = []
 ultimo_aggiornamento = None
-JSON_FILE = 'bandi_database_reale.json'
+JSON_FILE = "bandi_database_reale.json"
 
+
+# ========================
+# 🧠 FUNZIONI DI UTILITÀ
+# ========================
 
 def carica_bandi_da_json():
+    """Carica i bandi da file JSON se esiste"""
     global bandi_cache
-    print("=== [DEBUG] Avvio caricamento JSON Bandi ===")
-    print(f"=== [DEBUG] Cerco file: {JSON_FILE}, esiste? {os.path.exists(JSON_FILE)} ===")
     try:
-        if os.path.exists(JSON_FILE):
-            with open(JSON_FILE, 'r', encoding='utf-8') as f:
-                bandi_cache = json.load(f)
-                print(f"✅ Caricati {len(bandi_cache)} bandi da {JSON_FILE}")
-                if len(bandi_cache) > 0:
-                    print(f"✪ [DEBUG] Primo bando: {bandi_cache[0]}")
-                return True
-        else:
-            print(f"⚠️ [DEBUG] File {JSON_FILE} non trovato nella cartella: {os.getcwd()}")
+        if not os.path.exists(JSON_FILE):
+            with open(JSON_FILE, "w", encoding="utf-8") as f:
+                json.dump([], f)
+            print(f"📁 Creato file JSON vuoto: {JSON_FILE}")
+        with open(JSON_FILE, "r", encoding="utf-8") as f:
+            bandi_cache = json.load(f)
+        print(f"✅ Caricati {len(bandi_cache)} bandi da {JSON_FILE}")
+        return True
     except Exception as e:
         print(f"⚠️ Errore caricamento JSON: {e}")
-    return False
+        return False
 
 
 def salva_bandi_su_json():
     try:
-        with open(JSON_FILE, 'w', encoding='utf-8') as f:
+        with open(JSON_FILE, "w", encoding="utf-8") as f:
             json.dump(bandi_cache, f, ensure_ascii=False, indent=2)
         print(f"💾 Salvati {len(bandi_cache)} bandi su {JSON_FILE}")
     except Exception as e:
@@ -80,80 +86,73 @@ def salva_bandi_su_json():
 
 def aggiungi_bando(nuovo_bando):
     global bandi_cache
-    for bando in bandi_cache:
-        if bando.get('url') == nuovo_bando.get('url'):
-            return False
-    bandi_cache.append(nuovo_bando)
-    return True
+    if not any(b.get("url") == nuovo_bando.get("url") for b in bandi_cache):
+        bandi_cache.append(nuovo_bando)
+        return True
+    return False
 
+
+# ========================
+# 🤖 SCRAPING AUTOMATICO
+# ========================
 
 def aggiorna_bandi_background():
     global bandi_cache, ultimo_aggiornamento
 
     while True:
         try:
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"🔄 Avvio scraping automatico - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"{'='*70}\n")
+            print(f"{'=' * 70}\n")
 
             nuovi_bandi_temp = []
 
+            # InPA
             if INPA_AVAILABLE:
                 try:
                     scraper = InPAScraper()
-                    inpa_bandi = scraper.scrape_bandi_list(max_pages=3)
-                    for b in inpa_bandi:
-                        if b not in nuovi_bandi_temp:
-                            nuovi_bandi_temp.append(b)
-                    print(f"✅ InPA: {len(inpa_bandi)} bandi trovati")
+                    nuovi_bandi_temp += scraper.scrape_bandi_list(max_pages=3)
+                    print(f"✅ InPA: {len(nuovi_bandi_temp)} bandi trovati")
                 except Exception as e:
                     print(f"⚠️ Errore scraping InPA: {e}")
 
+            # Gazzetta
             if GAZZETTA_AVAILABLE:
                 try:
                     scraper = GazzettaScraper()
-                    gazzetta_bandi = scraper.scrape_ultimi_30_giorni()
-                    for b in gazzetta_bandi:
-                        if b not in nuovi_bandi_temp:
-                            nuovi_bandi_temp.append(b)
-                    print(f"✅ Gazzetta: {len(gazzetta_bandi)} bandi trovati")
+                    nuovi_bandi_temp += scraper.scrape_ultimi_30_giorni()
+                    print(f"✅ Gazzetta: {len(nuovi_bandi_temp)} bandi trovati")
                 except Exception as e:
                     print(f"⚠️ Errore scraping Gazzetta: {e}")
 
+            # MIMIT
             if MIMIT_AVAILABLE:
                 try:
                     scraper = MIMITScraper()
-                    mimit_bandi = scraper.scrape_incentivi()
-                    for b in mimit_bandi:
-                        if b not in nuovi_bandi_temp:
-                            nuovi_bandi_temp.append(b)
-                    print(f"✅ MIMIT: {len(mimit_bandi)} bandi trovati")
+                    nuovi_bandi_temp += scraper.scrape_incentivi()
+                    print(f"✅ MIMIT: {len(nuovi_bandi_temp)} bandi trovati")
                 except Exception as e:
                     print(f"⚠️ Errore scraping MIMIT: {e}")
 
+            # Invitalia
             if INVITALIA_AVAILABLE:
                 try:
                     scraper = InvitaliaScraper()
-                    invitalia_bandi = scraper.scrape_incentivi()
-                    for b in invitalia_bandi:
-                        if b not in nuovi_bandi_temp:
-                            nuovi_bandi_temp.append(b)
-                    print(f"✅ Invitalia: {len(invitalia_bandi)} bandi trovati")
+                    nuovi_bandi_temp += scraper.scrape_incentivi()
+                    print(f"✅ Invitalia: {len(nuovi_bandi_temp)} bandi trovati")
                 except Exception as e:
                     print(f"⚠️ Errore scraping Invitalia: {e}")
 
-            if len(nuovi_bandi_temp) > 0:
-                bandi_cache.clear()
-                bandi_cache.extend(nuovi_bandi_temp)
+            # Aggiorna cache
+            if nuovi_bandi_temp:
+                bandi_cache[:] = nuovi_bandi_temp
                 salva_bandi_su_json()
-                print(f"✅ Cache aggiornata con {len(bandi_cache)} bandi")
                 ultimo_aggiornamento = datetime.now()
+                print(f"✅ Cache aggiornata con {len(bandi_cache)} bandi totali")
             else:
-                print("⚠️ Nessun bando recuperato, cache non aggiornata")
+                print("⚠️ Nessun bando recuperato")
 
-            print(f"\n{'='*70}")
-            print(f"⏰ Prossimo aggiornamento tra 30 minuti")
-            print(f"{'='*70}\n")
+            print(f"⏰ Prossimo aggiornamento tra 30 minuti\n{'=' * 70}\n")
 
         except Exception as e:
             print(f"❌ Errore generale scraping: {str(e)}")
@@ -162,197 +161,64 @@ def aggiorna_bandi_background():
 
 
 def avvia_scraping_iniziale():
-    global ultimo_aggiornamento
-    print("📡 Carico bandi esistenti da JSON...")
+    print("📡 Caricamento bandi iniziale...")
     if carica_bandi_da_json():
-        ultimo_aggiornamento = datetime.now()
-        print(f"✅ Bandi caricati: {len(bandi_cache)}")
+        print(f"✅ Bandi iniziali caricati: {len(bandi_cache)}")
     else:
-        print("⚠️ Nessun file JSON trovato, eseguo scraping iniziale...")
-        nuovi = 0
-        if INPA_AVAILABLE:
-            try:
-                scraper = InPAScraper()
-                for bando in scraper.scrape_bandi_list(max_pages=3):
-                    if aggiungi_bando(bando):
-                        nuovi += 1
-            except Exception as e:
-                print(f"⚠️ Errore InPA: {e}")
-        if GAZZETTA_AVAILABLE:
-            try:
-                scraper = GazzettaScraper()
-                for bando in scraper.scrape_ultimi_30_giorni():
-                    if aggiungi_bando(bando):
-                        nuovi += 1
-            except Exception as e:
-                print(f"⚠️ Errore Gazzetta: {e}")
-        if MIMIT_AVAILABLE:
-            try:
-                scraper = MIMITScraper()
-                for bando in scraper.scrape_incentivi():
-                    if aggiungi_bando(bando):
-                        nuovi += 1
-            except Exception as e:
-                print(f"⚠️ Errore MIMIT: {e}")
-        if INVITALIA_AVAILABLE:
-            try:
-                scraper = InvitaliaScraper()
-                for bando in scraper.scrape_incentivi():
-                    if aggiungi_bando(bando):
-                        nuovi += 1
-            except Exception as e:
-                print(f"⚠️ Errore Invitalia: {e}")
-        salva_bandi_su_json()
-        ultimo_aggiornamento = datetime.now()
-        print(f"✅ Primo scraping completato: {len(bandi_cache)} bandi, {nuovi} nuovi")
+        print("⚠️ Nessun bando iniziale trovato")
 
 
 def avvia_thread_scraping():
     threading.Thread(target=aggiorna_bandi_background, daemon=True).start()
 
 
-# ========== ENDPOINT API ==========
+# ========================
+# 🌐 ENDPOINT API
+# ========================
 
-@app.route('/')
+@app.route("/")
 def serve_frontend():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(".", "index.html")
 
 
-@app.route('/api/bandi', methods=['GET'])
+@app.route("/api/bandi")
 def get_bandi():
-    print(f"[DEBUG] BandI da restituire: {len(bandi_cache)}")
     return jsonify({
-        'success': True,
-        'count': len(bandi_cache),
-        'ultimo_aggiornamento': ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None,
-        'bandi': bandi_cache
+        "success": True,
+        "count": len(bandi_cache),
+        "ultimo_aggiornamento": ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None,
+        "bandi": bandi_cache
     })
 
 
-@app.route('/api/bandi/categoria/<categoria>', methods=['GET'])
-def get_bandi_by_categoria(categoria):
-    filtrati = [b for b in bandi_cache if b.get('category') == categoria]
-    return jsonify({
-        'success': True,
-        'count': len(filtrati),
-        'categoria': categoria,
-        'bandi': filtrati
-    })
-
-
-@app.route('/api/bandi/regione/<regione>', methods=['GET'])
-def get_bandi_by_regione(regione):
-    filtrati = [b for b in bandi_cache if b.get('region') == regione or b.get('region') == 'nazionale']
-    return jsonify({
-        'success': True,
-        'count': len(filtrati),
-        'regione': regione,
-        'bandi': filtrati
-    })
-
-
-@app.route('/api/stats', methods=['GET'])
-def get_stats():
-    oggi = datetime.now().date()
-    
-    bandi_aperti = 0
-    bandi_scadenza = 0
-    
-    for b in bandi_cache:
-        if b.get('deadline'):
-            try:
-                deadline = datetime.fromisoformat(b['deadline'].replace('Z', '+00:00')).date()
-                if deadline > oggi:
-                    bandi_aperti += 1
-                    if (deadline - oggi).days <= 30:
-                        bandi_scadenza += 1
-            except:
-                pass
-    
-    return jsonify({
-        'success': True,
-        'stats': {
-            'totale': len(bandi_cache),
-            'aperti': bandi_aperti,
-            'in_scadenza': bandi_scadenza,
-            'ultimo_aggiornamento': ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None
-        }
-    })
-
-
-@app.route('/api/scrape/now', methods=['POST', 'GET'])
-def force_scrape():
-    threading.Thread(target=aggiorna_bandi_background, daemon=True).start()
-    return jsonify({
-        'success': True,
-        'message': 'Scraping avviato in background'
-    })
-
-
-@app.route('/api/health', methods=['GET'])
+@app.route("/api/health")
 def health_check():
     return jsonify({
-        'status': 'ok',
-        'bandi_count': len(bandi_cache),
-        'ultimo_aggiornamento': ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None,
-        'scrapers_disponibili': {
-            'inpa': INPA_AVAILABLE,
-            'gazzetta': GAZZETTA_AVAILABLE,
-            'mimit': MIMIT_AVAILABLE,
-            'invitalia': INVITALIA_AVAILABLE
+        "status": "ok",
+        "bandi_count": len(bandi_cache),
+        "ultimo_aggiornamento": ultimo_aggiornamento.isoformat() if ultimo_aggiornamento else None,
+        "scrapers_disponibili": {
+            "inpa": INPA_AVAILABLE,
+            "gazzetta": GAZZETTA_AVAILABLE,
+            "mimit": MIMIT_AVAILABLE,
+            "invitalia": INVITALIA_AVAILABLE
         }
     })
 
 
-@app.route('/api/debug/bandi_json', methods=['GET'])
-def debug_bandi_json():
-    try:
-        with open(JSON_FILE, 'r', encoding='utf-8') as f:
-            bandi = json.load(f)
-        return jsonify({'success': True, 'count': len(bandi), 'example': bandi[:2]})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+# ========================
+# 🚀 AVVIO AUTOMATICO PER RAILWAY
+# ========================
 
+try:
+    print("⚙️ Avvio automatico di scraping iniziale e thread background...")
+    avvia_scraping_iniziale()
+    avvia_thread_scraping()
+except Exception as e:
+    print(f"❌ Errore in avvio automatico: {e}")
 
-@app.route('/api/debug/bandi_status', methods=['GET'])
-def debug_bandi_status():
-    try:
-        file_exists = os.path.exists(JSON_FILE)
-        data_preview = []
-        if file_exists:
-            with open(JSON_FILE, 'r', encoding='utf-8') as f:
-                bandi = json.load(f)
-                data_preview = bandi[:3]
-        return jsonify({
-            'success': True,
-            'file_exists': file_exists,
-            'bandi_count': len(data_preview),
-            'preview': data_preview
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        })
-
-
-@app.route('/api/debug/scrape/<source>')
-def debug_scrape(source):
-    try:
-        if source == 'gazzetta' and GAZZETTA_AVAILABLE:
-            scraper = GazzettaScraper()
-            result = scraper.scrape_ultimi_30_giorni()
-        elif source == 'mimit' and MIMIT_AVAILABLE:
-            scraper = MIMITScraper()
-            result = scraper.scrape_incentivi()
-        elif source == 'invitalia' and INVITALIA_AVAILABLE:
-            scraper = InvitaliaScraper()
-            result = scraper.scrape_incentivi()
-        else:
-            return jsonify({'success': False, 'error': 'Scraper non disponibile'})
-        return jsonify({'success': True, 'count': len(result), 'sample': result[:3]})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-
-
+# Solo per esecuzione locale
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    print(f"🌐 Esecuzione locale su porta {port}")
+    app.run(host="0.0.0.0", port=port, debug=True)
