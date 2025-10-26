@@ -630,7 +630,7 @@ function resetFiltri() {
 }
 async function caricaBandi() {
   try {
-    const res = await fetch("/api/bandi");
+    const res = await fetch(API_URL);
     if (!res.ok) throw new Error("API non disponibile");
     const data = await res.json();
 
