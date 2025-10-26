@@ -629,13 +629,21 @@ function resetFiltri() {
   renderBandi(bandiFiltrati);
 }
 async function caricaBandi() {
+  const container = document.getElementById("bandiContainer");
   try {
+    console.log("[caricaBandi] richiesta a:", API_URL);
     const res = await fetch(API_URL);
-    if (!res.ok) throw new Error("API non disponibile");
+    console.log("[caricaBandi] status:", res.status, res.statusText);
+    if (!res.ok) throw new Error("API non disponibile: " + res.status);
     const data = await res.json();
+    console.log("[caricaBandi] dati ricevuti dalla API:", data);
 
     // Accetta sia array puro che oggetto { bandi: [...] } o { items: [...] }
     const items = Array.isArray(data) ? data : (data.bandi || data.items || []);
+    if (!items || items.length === 0) {
+      console.warn("[caricaBandi] API ritorna array vuoto o campo 'bandi'/'items' mancante.");
+    }
+
     // Fallback extra: se non arriva niente dall’API ma esiste il DB locale nel file
     const list = (items && items.length) ? items : (typeof bandiDatabase !== "undefined" ? bandiDatabase : []);
 
@@ -656,8 +664,13 @@ async function caricaBandi() {
     bandiFiltrati = [...tuttiBandi];
     aggiornaStatistiche();
     renderBandi(bandiFiltrati);
+
+    // Se non ci sono risultati, mostra messaggio più specifico
+    if (!tuttiBandi.length) {
+      container.innerHTML = '<div class="no-results">Nessun bando trovato. Controlla la console (network) e verifica che lo scraping abbia scritto i dati nell\'API o nel file locale.</div>';
+    }
   } catch (e) {
-    console.error(e);
+    console.error("[caricaBandi] errore:", e);
     // Fallback a DB locale se l’API fallisce
     if (typeof bandiDatabase !== "undefined") {
       tuttiBandi = bandiDatabase.map(b => ({
@@ -676,7 +689,17 @@ async function caricaBandi() {
       aggiornaStatistiche();
       renderBandi(bandiFiltrati);
     } else {
-      alert("Errore caricamento bandi da API.");
+      container.innerHTML = `<div class="no-results">Errore caricamento bandi: ${e.message}. Apri la console (F12) per dettagli.</div>`;
     }
   }
 }
+
+// Avvia il caricamento quando il DOM è pronto
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM pronto — avvio caricamento bandi');
+  caricaBandi();
+});
+
+</script>
+</body>
+</html>
