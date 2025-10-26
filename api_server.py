@@ -381,5 +381,6 @@ if __name__ == '__main__':
     print("="*70 + "\n")
     
     # Avvia server Flask
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+    print("\n=== BOOT FLASK in modalità locale ===\n")
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
