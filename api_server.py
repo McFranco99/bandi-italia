@@ -47,6 +47,16 @@ except Exception as e:
 # ========================
 
 app = Flask(__name__)
+from flask import redirect, request
+
+@app.before_request
+def force_https_and_www():
+    url = request.url
+    if not request.is_secure or not request.host.startswith("www."):
+        secure_url = url.replace("http://", "https://")
+        if not request.host.startswith("www."):
+            secure_url = secure_url.replace(request.host, f"www.{request.host}")
+        return redirect(secure_url, code=301)
 CORS(app)
 
 bandi_cache = []
