@@ -147,7 +147,7 @@ def aggiorna_bandi_background():
                     print(f"⚠️ Errore scraping MIMIT: {e}")
                     
             if CONSAP_AVAILABLE:
-                    try:
+                try:
                     scraper = ConsapScraper()
                     nuovi_bandi_temp += scraper.scrape()
                     print(f"✅ Consap: {len(nuovi_bandi_temp)} bandi trovati finora")
