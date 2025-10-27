@@ -33,7 +33,8 @@ class ConsapScraper:
 
                 # ignora pagine istituzionali, tiene solo i fondi
                 if not path or any(x in path for x in [
-                    "chi-siamo", "media-room", "contatti", "privacy", "cookie", "servizi"
+                    "chi-siamo", "media-room", "contatti", "privacy", "cookie", "servizi",
+                    "news", "comunicati-stampa", "dicono-di-noi"
                 ]):
                     continue
 
