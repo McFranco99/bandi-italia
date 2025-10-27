@@ -586,6 +586,51 @@
     width: 100%;
   }
 }
+/* ✅ Fix layout card bandi su mobile */
+@media (max-width: 768px) {
+  .bandi-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .bando-card {
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 18px;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Titoli e testo più leggibili */
+  .bando-title {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .bando-description {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* 🔧 Pulsanti verticali */
+  .bando-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bando-actions .btn {
+    width: 100%;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  /* Evita scrolling orizzontale */
+  body {
+    overflow-x: hidden;
+  }
+}
+
   </style>
 </head>
 <body>
