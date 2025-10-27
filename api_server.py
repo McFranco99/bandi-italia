@@ -14,12 +14,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Scraper disponibili
-try:
-    from inpa_scraper import InPAScraper
-    INPA_AVAILABLE = True
-except Exception as e:
-    INPA_AVAILABLE = False
-    print(f"⚠️ InPAScraper non disponibile: {e}")
+
 
 try:
     from gazzetta_scraper import GazzettaScraper
@@ -125,14 +120,7 @@ def aggiorna_bandi_background():
 
             nuovi_bandi_temp = []
 
-            # InPA
-            if INPA_AVAILABLE:
-                try:
-                    scraper = InPAScraper()
-                    nuovi_bandi_temp += scraper.scrape_bandi_list(max_pages=3)
-                    print(f"✅ InPA: {len(nuovi_bandi_temp)} bandi trovati")
-                except Exception as e:
-                    print(f"⚠️ Errore scraping InPA: {e}")
+
 
             # Gazzetta
             if GAZZETTA_AVAILABLE:
