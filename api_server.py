@@ -222,6 +222,23 @@ def health_check():
         }
     })
 
+# ========================
+# 🗺️ SITEMAP & ROBOTS
+# ========================
+
+from flask import send_from_directory
+
+@app.route("/sitemap.xml")
+def serve_sitemap():
+    """Serve la sitemap XML per Google"""
+    return send_from_directory(os.getcwd(), "sitemap.xml")
+
+@app.route("/robots.txt")
+def serve_robots():
+    """Serve il file robots.txt"""
+    return send_from_directory(os.getcwd(), "robots.txt")
+
+
 
 # ========================
 # 🚀 AVVIO AUTOMATICO PER RAILWAY
