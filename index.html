@@ -495,6 +495,97 @@
   @media (prefers-color-scheme: dark){
     .drawer-details .item { background: rgba(0,0,0,.2); }
   }
+  @media (max-width: 768px) {
+
+  /* Layout base */
+  body {
+    font-size: 15px;
+    padding: 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 16px;
+  }
+
+  .filters {
+    padding: 16px 12px;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* ✅ Risolve il problema del pulsante Reset fuori schermo */
+  .search-box {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .bando-card {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  /* Miglioramento leggibilità cards */
+  .bando-title {
+    font-size: 18px;
+  }
+
+  /* Drawer ottimizzato per mobile (slide dal basso come un'app) */
+  .drawer {
+    width: 100%;
+    height: 90%;
+    bottom: 0;
+    top: auto;
+    border-left: none;
+    border-top: 1px solid var(--color-card-border);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    transform: translateY(100%);
+    transition: transform 0.3s var(--ease-standard);
+  }
+
+  .drawer.open {
+    transform: translateY(0);
+  }
+
+  .drawer-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drawer-footer .btn {
+    width: 100%;
+  }
+}
   </style>
 </head>
 <body>
