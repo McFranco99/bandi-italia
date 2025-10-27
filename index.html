@@ -136,16 +136,26 @@
       --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
     }
   }
+
+  /* Base reset */
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     font-family: var(--font-family-base);
-    background-color: var(--color-background);
+    background: linear-gradient(180deg, rgba(33,128,141,0.06), rgba(255,255,255,0)) no-repeat,
+                var(--color-background);
     color: var(--color-text);
     line-height: 1.5;
     font-size: var(--font-size-base);
+    text-rendering: optimizeLegibility;
   }
+
+  /* Header migliorato (mantiene colori) */
   .header {
-    background-color: var(--color-surface);
+    background:
+      linear-gradient(180deg, rgba(var(--color-teal-500-rgb), 0.08), rgba(0,0,0,0) 60%),
+      var(--color-surface);
+    backdrop-filter: saturate(1.1);
     border-bottom: 1px solid var(--color-card-border);
     padding: var(--space-24) var(--space-16);
     box-shadow: var(--shadow-sm);
@@ -153,22 +163,71 @@
     top: 0;
     z-index: 100;
   }
-  .header-content { max-width: 1200px; margin: 0 auto; }
+  .header-content { max-width: 1200px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; }
   .logo {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
     color: var(--color-primary);
-    margin-bottom: var(--space-8);
+    letter-spacing: .2px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo::after{
+    content:"•";
+    color: var(--color-primary);
+    opacity:.5;
+    font-weight: var(--font-weight-bold);
+    transform: translateY(-1px);
   }
   .tagline { font-size: var(--font-size-base); color: var(--color-text-secondary); }
+
+  /* Mini nav opzionale (senza registrazione) */
+  .top-actions { display:flex; align-items:center; gap:10px; }
+  .pill {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 12px; border-radius: 999px;
+    background: var(--color-secondary);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--color-card-border);
+    box-shadow: var(--shadow-sm);
+    user-select:none;
+  }
+
   .container { max-width: 1200px; margin: 0 auto; padding: var(--space-24) var(--space-16); }
+
+  /* Hero leggero (stessi colori) */
+  .hero {
+    margin-top: 8px;
+    background:
+      radial-gradient(1200px 300px at 50% -50px, rgba(var(--color-teal-500-rgb),0.10), transparent 60%),
+      var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: 16px;
+    padding: 20px 18px;
+    box-shadow: var(--shadow-sm);
+    display:flex; align-items:center; justify-content:space-between; gap:18px;
+  }
+  .hero h2{
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+  }
+  .hero p{
+    color: var(--color-text-secondary);
+    margin-top: 6px;
+  }
+
+  /* Filtri (effetto glass leggero) */
   .filters {
-    background-color: var(--color-surface);
+    background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.85));
     border: 1px solid var(--color-card-border);
     border-radius: var(--radius-lg);
     padding: var(--space-24);
-    margin-bottom: var(--space-32);
+    margin: var(--space-24) 0 var(--space-32);
     box-shadow: var(--shadow-sm);
+  }
+  @media (prefers-color-scheme: dark) {
+    .filters { background: rgba(0,0,0,.3); backdrop-filter: blur(3px); }
   }
   .filters h2 {
     font-size: var(--font-size-xl);
@@ -187,28 +246,43 @@
   .filter-select, .search-input {
     padding: var(--space-8) var(--space-12);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-base);
+    border-radius: 12px;
     background-color: var(--color-background);
     color: var(--color-text);
     font-size: var(--font-size-base);
-    transition: border-color var(--duration-fast) var(--ease-standard);
+    transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
   }
-  .filter-select:focus, .search-input:focus { outline: none; border-color: var(--color-primary); }
+  .filter-select:focus, .search-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-teal-500-rgb), .15); }
+  .filter-select:hover, .search-input:hover { transform: translateY(-1px); }
+
   .search-box { display: flex; gap: var(--space-12); margin-top: var(--space-16); }
   .search-input { flex: 1; }
+
   .btn {
     padding: var(--space-8) var(--space-20);
     border: none;
-    border-radius: var(--radius-base);
+    border-radius: 12px;
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-standard);
+    transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), background-color var(--duration-normal) var(--ease-standard);
+    will-change: transform;
   }
-  .btn-primary { background-color: var(--color-primary); color: var(--color-btn-primary-text); }
-  .btn-primary:hover { background-color: var(--color-primary-hover); }
-  .btn-secondary { background-color: var(--color-secondary); color: var(--color-text); }
-  .btn-secondary:hover { background-color: var(--color-secondary-hover); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary {
+    background: linear-gradient(180deg, rgba(var(--color-teal-500-rgb), 1), rgba(var(--color-teal-500-rgb), .9));
+    color: var(--color-btn-primary-text);
+    box-shadow: 0 6px 16px rgba(var(--color-teal-500-rgb), .20);
+  }
+  .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(var(--color-teal-500-rgb), .25); }
+  .btn-secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-card-border);
+  }
+  .btn-secondary:hover { background-color: var(--color-secondary-hover); transform: translateY(-1px); }
+
+  /* Stats */
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -216,13 +290,15 @@
     margin-bottom: var(--space-32);
   }
   .stat-card {
-    background-color: var(--color-surface);
+    background: var(--color-surface);
     border: 1px solid var(--color-card-border);
     border-radius: var(--radius-lg);
     padding: var(--space-20);
     text-align: center;
     box-shadow: var(--shadow-sm);
+    transition: transform .2s var(--ease-standard), box-shadow .2s var(--ease-standard);
   }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .stat-number {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
@@ -230,13 +306,15 @@
     margin-bottom: var(--space-8);
   }
   .stat-label { font-size: var(--font-size-base); color: var(--color-text-secondary); }
+
+  /* Card bandi */
   .bandi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: var(--space-24);
   }
   .bando-card {
-    background-color: var(--color-surface);
+    background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,1));
     border: 1px solid var(--color-card-border);
     border-radius: var(--radius-lg);
     padding: var(--space-24);
@@ -244,38 +322,99 @@
     transition: all var(--duration-normal) var(--ease-standard);
     display: flex;
     flex-direction: column;
+    animation: fadeUp .45s var(--ease-standard) both;
   }
-  .bando-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-  .bando-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-16); gap: var(--space-12); }
+  @media (prefers-color-scheme: dark){
+    .bando-card { background: rgba(0,0,0,.2); }
+  }
+  .bando-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .bando-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-16);
+    gap: var(--space-12);
+  }
   .bando-category {
-    display: inline-block; padding: var(--space-4) var(--space-12); border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+    display: inline-block;
+    padding: var(--space-4) var(--space-12);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
   }
   .category-immobili { background-color: rgba(59, 130, 246, 0.15); color: #1d4ed8; border: 1px solid rgba(59, 130, 246, 0.3); }
   .category-imprese { background-color: rgba(34, 197, 94, 0.15); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3); }
   .category-lavoro { background-color: rgba(168, 85, 247, 0.15); color: #6b21a8; border: 1px solid rgba(168, 85, 247, 0.3); }
   .category-generale { background-color: rgba(245, 158, 11, 0.15); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3); }
-  .bando-status { padding: var(--space-4) var(--space-12); border-radius: var(--radius-sm); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
+
+  .bando-status {
+    padding: var(--space-4) var(--space-12);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+  }
   .status-aperto { background-color: rgba(var(--color-teal-500-rgb), 0.15); color: var(--color-success); border: 1px solid rgba(var(--color-teal-500-rgb), 0.25); }
   .status-scadenza { background-color: rgba(245, 158, 11, 0.15); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
   .status-chiuso { background-color: rgba(var(--color-slate-500-rgb), 0.15); color: var(--color-text-secondary); border: 1px solid rgba(var(--color-slate-500-rgb), 0.25); }
+
   .bando-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-text); margin-bottom: var(--space-12); line-height: 1.3; }
   .bando-ente { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-16); font-weight: var(--font-weight-medium); }
   .bando-description { font-size: var(--font-size-base); color: var(--color-text); margin-bottom: var(--space-16); line-height: 1.6; flex: 1; }
-  .bando-details { display: flex; flex-direction: column; gap: var(--space-8); padding-top: var(--space-16); border-top: 1px solid var(--color-card-border); }
+
+  .bando-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding-top: var(--space-16);
+    border-top: 1px solid var(--color-card-border);
+  }
   .bando-detail-item { display: flex; justify-content: space-between; font-size: var(--font-size-sm); }
   .detail-label { color: var(--color-text-secondary); font-weight: var(--font-weight-medium); }
   .detail-value { color: var(--color-text); font-weight: var(--font-weight-semibold); }
+
   .bando-actions { display: flex; gap: var(--space-8); margin-top: var(--space-16); }
   .btn-small { padding: var(--space-8) var(--space-16); font-size: var(--font-size-sm); flex: 1; }
-  .no-results { text-align: center; padding: var(--space-32); color: var(--color-text-secondary); font-size: var(--font-size-lg); }
-  .footer { background-color: var(--color-surface); border-top: 1px solid var(--color-card-border); padding: var(--space-32) var(--space-16); margin-top: var(--space-32); }
+
+  .no-results {
+    text-align: center;
+    padding: var(--space-32);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+  }
+
+  /* Footer */
+  .footer {
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-card-border);
+    padding: var(--space-32) var(--space-16);
+    margin-top: var(--space-32);
+  }
   .footer-content { max-width: 1200px; margin: 0 auto; text-align: center; }
   .footer-text { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-16); }
   .footer-links { display: flex; justify-content: center; gap: var(--space-24); flex-wrap: wrap; }
   .footer-link { color: var(--color-primary); text-decoration: none; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); transition: color var(--duration-fast) var(--ease-standard); }
   .footer-link:hover { color: var(--color-primary-hover); }
+
+  /* Animazioni */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Accessibilità */
+  :focus-visible {
+    outline: 3px solid rgba(var(--color-teal-500-rgb), .35);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+
   @media (max-width: 768px) {
+    .header-content { flex-direction: column; align-items:flex-start; gap:6px; }
+    .hero { flex-direction: column; align-items: flex-start; }
     .bandi-grid { grid-template-columns: 1fr; }
     .filter-grid { grid-template-columns: 1fr; }
     .stats { grid-template-columns: repeat(2, 1fr); }
@@ -285,12 +424,25 @@
 <body>
 <header class="header">
   <div class="header-content">
-    <h1 class="logo">🇮🇹 Bandi Per Te</h1>
-    <p class="tagline">Aggregatore nazionale di bandi per immobili, imprese, lavoro e investimenti</p>
+    <div>
+      <h1 class="logo">🇮🇹 Bandi Per Te</h1>
+      <p class="tagline">Aggregatore nazionale di bandi per immobili, imprese, lavoro e investimenti</p>
+    </div>
+    <div class="top-actions" aria-hidden="true">
+      <span class="pill">Nessuna registrazione richiesta</span>
+    </div>
   </div>
 </header>
 
 <main class="container">
+  <!-- Hero leggero e informativo -->
+  <section class="hero" aria-label="Introduzione">
+    <div>
+      <h2>Tutti i bandi, in un unico posto</h2>
+      <p>Filtra per categoria, regione, ente e stato di apertura. Interfaccia semplice, aggiornamento continuo.</p>
+    </div>
+  </section>
+
   <section class="filters">
     <h2>Filtra i bandi</h2>
     <div class="filter-grid">
@@ -387,8 +539,6 @@
 </footer>
 
 <script>
-
-
 const API_URL = "https://www.bandiperte.it/api/bandi";
 
 let tuttiBandi = [];
@@ -571,7 +721,6 @@ window.addEventListener('DOMContentLoaded', () => {
   console.log('DOM pronto — avvio caricamento bandi');
   caricaBandi();
 });
-
 </script>
 </body>
 </html>
