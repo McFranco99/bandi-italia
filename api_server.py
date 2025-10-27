@@ -239,6 +239,10 @@ def serve_robots():
     """Serve il file robots.txt"""
     return send_from_directory(os.getcwd(), "robots.txt")
 
+@app.route("/ads.txt")
+def serve_ads():
+    """Serve il file ads.txt per Google AdSense"""
+    return send_from_directory(os.getcwd(), "ads.txt")
 
 
 # ========================
