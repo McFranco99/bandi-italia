@@ -15,7 +15,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Scraper disponibili
 
-
+try:
+    from consap_scraper import ConsapScraper
+    CONSAP_AVAILABLE = True
+except Exception as e:
+    CONSAP_AVAILABLE = False
+    print(f"⚠️ ConsapScraper non disponibile: {e}")
+    
 try:
     from gazzetta_scraper import GazzettaScraper
     GAZZETTA_AVAILABLE = True
@@ -139,6 +145,11 @@ def aggiorna_bandi_background():
                     print(f"✅ MIMIT: {len(nuovi_bandi_temp)} bandi trovati")
                 except Exception as e:
                     print(f"⚠️ Errore scraping MIMIT: {e}")
+                    
+            if CONSAP_AVAILABLE:
+                nuovi_bandi_temp += ConsapScraper().scrape()
+
+            
 
             # Invitalia
             if INVITALIA_AVAILABLE:
