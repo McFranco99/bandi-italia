@@ -252,6 +252,11 @@ try:
 except Exception as e:
     print(f"❌ Errore in avvio automatico: {e}")
 
+@app.route("/<path:path>")
+def serve_static_files(path):
+    """Serve tutti i file statici dalla root (per AdSense, sitemap, robots, ecc.)"""
+    return send_from_directory(".", path)
+
 # Solo per esecuzione locale
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
