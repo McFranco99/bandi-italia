@@ -18,7 +18,6 @@
   <meta property="og:description" content="Aggregatore nazionale di bandi e incentivi: filtra per regione, ente e scadenza. Aggiornato in tempo reale." />
   <meta property="og:url" content="https://www.bandiperte.it/" />
   <meta property="og:type" content="website" />
-  <!-- Se hai un’immagine OG, crea /og-image.jpg (1200x630) oppure cambia URL -->
   <meta property="og:image" content="https://www.bandiperte.it/og-image.jpg" />
 
   <!-- Twitter -->
@@ -149,6 +148,7 @@
     font-size: var(--font-size-base);
     text-rendering: optimizeLegibility;
   }
+  body.no-scroll { overflow: hidden; }
 
   /* Header migliorato (mantiene colori) */
   .header {
@@ -323,6 +323,7 @@
     display: flex;
     flex-direction: column;
     animation: fadeUp .45s var(--ease-standard) both;
+    cursor: pointer;
   }
   @media (prefers-color-scheme: dark){
     .bando-card { background: rgba(0,0,0,.2); }
@@ -419,6 +420,81 @@
     .filter-grid { grid-template-columns: 1fr; }
     .stats { grid-template-columns: repeat(2, 1fr); }
   }
+
+  /* ===== Drawer (sidebar) a destra + overlay ===== */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s var(--ease-standard), visibility .3s var(--ease-standard);
+    z-index: 999;
+  }
+  .drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .drawer {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: min(560px, 40vw);
+    max-width: 100%;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-left: 1px solid var(--color-card-border);
+    box-shadow: -8px 0 24px rgba(0,0,0,.12);
+    transform: translateX(100%);
+    transition: transform .3s var(--ease-standard);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid var(--color-card-border);
+    position: sticky; top:0; background: var(--color-surface); z-index:1;
+  }
+  .drawer-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+    flex: 1;
+  }
+  .drawer-body {
+    padding: 16px;
+    overflow: auto;
+  }
+  .drawer-footer {
+    padding: 16px;
+    border-top: 1px solid var(--color-card-border);
+    display:flex; gap:8px;
+    position: sticky; bottom: 0; background: var(--color-surface);
+  }
+  .btn-linklike {
+    background: transparent;
+    border: 1px solid var(--color-card-border);
+    color: var(--color-text);
+  }
+  .badge {
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid var(--color-card-border);
+    background: var(--color-secondary);
+  }
+  .drawer-details {
+    display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin: 12px 0 16px;
+  }
+  .drawer-details .item {
+    background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,1));
+    border: 1px solid var(--color-card-border);
+    border-radius: 10px; padding: 10px;
+  }
+  .drawer-details .label { font-size: 12px; color: var(--color-text-secondary); }
+  .drawer-details .value { font-weight: var(--font-weight-semibold); }
+  @media (prefers-color-scheme: dark){
+    .drawer-details .item { background: rgba(0,0,0,.2); }
+  }
   </style>
 </head>
 <body>
@@ -434,7 +510,7 @@
   </div>
 </header>
 
-<main class="container">
+<main class="container" id="mainContent" aria-live="polite">
   <!-- Hero leggero e informativo -->
   <section class="hero" aria-label="Introduzione">
     <div>
@@ -521,7 +597,7 @@
     </div>
   </section>
 
-  <section id="bandiContainer" class="bandi-grid no-results">Nessun bando trovato.</section>
+  <section id="bandiContainer" class="bandi-grid no-results" aria-label="Elenco bandi">Nessun bando trovato.</section>
 </main>
 
 <footer class="footer">
@@ -538,11 +614,28 @@
   </div>
 </footer>
 
+<!-- Overlay e Drawer (sidebar a destra) -->
+<div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="drawerTitle" role="dialog">
+  <div class="drawer-header">
+    <button class="btn btn-linklike" id="btnBackToList" title="Torna ai bandi">← Torna ai bandi</button>
+    <h3 class="drawer-title" id="drawerTitle">Dettaglio bando</h3>
+  </div>
+  <div class="drawer-body" id="drawerContent">
+    <!-- Contenuto dinamico -->
+  </div>
+  <div class="drawer-footer">
+    <a id="drawerVisitLink" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Vai al bando</a>
+    <button class="btn btn-secondary" id="btnCloseDrawer">Chiudi</button>
+  </div>
+</aside>
+
 <script>
 const API_URL = "https://www.bandiperte.it/api/bandi";
 
 let tuttiBandi = [];
 let bandiFiltrati = [];
+let drawerIndexCorrente = null;
 
 function getCategoriaLabel(cat) {
   const labels = {
@@ -572,37 +665,46 @@ function matchEnteFilter(enteCompleto, filtroEnte) {
   };
   if (filtroEnte === "altro") {
     return !Object.values(mappingEnti).flat().some(keyword =>
-      enteCompleto.toLowerCase().includes(keyword));
+      (enteCompleto || "").toLowerCase().includes(keyword));
   }
   const keywords = mappingEnti[filtroEnte] || [];
-  return keywords.some(keyword => enteCompleto.toLowerCase().includes(keyword));
+  return keywords.some(keyword => (enteCompleto || "").toLowerCase().includes(keyword));
 }
 function aggiornaStatistiche() {
   document.getElementById("totaleBandi").textContent = bandiFiltrati.length;
   document.getElementById("bandiAperti").textContent = bandiFiltrati.filter(b => (b.stato || b.status) === "aperto").length;
   document.getElementById("scadenzaImminente").textContent = bandiFiltrati.filter(b => (b.stato || b.status) === "scadenza").length;
 }
+
+/* ---------- RENDER LISTA ---------- */
 function renderBandi(bandi) {
   const container = document.getElementById("bandiContainer");
   if (!bandi.length) {
+    container.classList.add('no-results');
     container.innerHTML = '<div class="no-results">Nessun bando trovato con i filtri selezionati.</div>';
     return;
   }
-  container.innerHTML = bandi.map(bando => {
+  container.classList.remove('no-results');
+
+  container.innerHTML = bandi.map((bando, idx) => {
     const titolo = bando.titolo || bando.title || "Bando senza titolo";
-    const categoria = getCategoriaLabel(bando.categoria || bando.category);
-    const stato = getStatoLabel(bando.stato || bando.status);
+    const categoriaKey = bando.categoria || bando.category || "generale";
+    const categoria = getCategoriaLabel(categoriaKey);
+    const statoKey = bando.stato || bando.status || "aperto";
+    const stato = getStatoLabel(statoKey);
     const ente = bando.ente || bando.entity || "N/D";
     const descrizione = bando.descrizione || bando.description || "Nessuna descrizione disponibile";
     const regione = getRegioneLabel(bando.regione || bando.region);
     const scadenza = bando.scadenza || bando.deadline || "N/D";
-    const importo = bando.importo || bando.amount || "N/D";
+    const importo = (bando.importo ?? bando.amount);
+    const importoView = (importo === undefined || importo === null || importo === "" ) ? "N/D" : importo;
     const link = (bando.link || bando.url || "#").replace(/^http:\/\//i, "https://");
+
     return `
-      <article class="bando-card">
+      <article class="bando-card" data-index="${idx}" tabindex="0" aria-label="Apri dettaglio bando: ${titolo}">
         <div class="bando-header">
-          <span class="bando-category category-${bando.categoria || bando.category || "generale"}">${categoria}</span>
-          <span class="bando-status status-${bando.stato || bando.status || "aperto"}">${stato}</span>
+          <span class="bando-category category-${categoriaKey}">${categoria}</span>
+          <span class="bando-status status-${statoKey}">${stato}</span>
         </div>
         <h3 class="bando-title">${titolo}</h3>
         <div class="bando-ente">🏛️ ${ente}</div>
@@ -610,15 +712,47 @@ function renderBandi(bandi) {
         <div class="bando-details">
           <div class="bando-detail-item"><span class="detail-label">Regione</span><span class="detail-value">${regione}</span></div>
           <div class="bando-detail-item"><span class="detail-label">Scadenza</span><span class="detail-value">${scadenza}</span></div>
-          <div class="bando-detail-item"><span class="detail-label">Importo</span><span class="detail-value">${importo}</span></div>
+          <div class="bando-detail-item"><span class="detail-label">Importo</span><span class="detail-value">${importoView}</span></div>
         </div>
         <div class="bando-actions">
+          <button class="btn btn-secondary btn-small js-apri-dettaglio" data-index="${idx}" aria-label="Dettagli bando">Dettagli</button>
           <a class="btn btn-primary btn-small" href="${link}" target="_blank" rel="noopener noreferrer">Vai al bando</a>
         </div>
       </article>
     `;
   }).join('');
+
+  // Delego il click/Enter per aprire il drawer
+  container.addEventListener('click', onCardClick);
+  container.addEventListener('keydown', onCardKeydown);
 }
+
+function onCardClick(e) {
+  // se clicco su bottone "Dettagli"
+  const btn = e.target.closest('.js-apri-dettaglio');
+  if (btn && btn.dataset.index !== undefined) {
+    openDrawer(parseInt(btn.dataset.index, 10));
+    return;
+  }
+  // se clicco su card (ma non su link)
+  const card = e.target.closest('.bando-card');
+  if (card && !e.target.closest('a')) {
+    const idx = parseInt(card.dataset.index, 10);
+    openDrawer(idx);
+  }
+}
+
+function onCardKeydown(e) {
+  if (e.key === 'Enter') {
+    const card = e.target.closest('.bando-card');
+    if (card) {
+      const idx = parseInt(card.dataset.index, 10);
+      openDrawer(idx);
+    }
+  }
+}
+
+/* ---------- FILTRI ---------- */
 function applicaFiltri() {
   const categoria = document.getElementById("categoria").value;
   const regione = document.getElementById("regione").value;
@@ -650,6 +784,8 @@ function resetFiltri() {
   aggiornaStatistiche();
   renderBandi(bandiFiltrati);
 }
+
+/* ---------- LOAD DATI ---------- */
 async function caricaBandi() {
   const container = document.getElementById("bandiContainer");
   try {
@@ -675,9 +811,9 @@ async function caricaBandi() {
       titolo: b.titolo || b.title || "Bando senza titolo",
       categoria: b.categoria || b.category || "generale",
       regione: b.regione || b.region || "nazionale",
-      ente: (b.ente || b.entity || b.source || "altro").toLowerCase(),
+      ente: (b.ente || b.entity || b.source || "altro"),
       scadenza: b.scadenza || b.deadline || "N/D",
-      importo: b.importo || b.amount || 0,
+      importo: (b.importo ?? b.amount ?? 0),
       link: b.link || b.url || "#",
       stato: b.stato || b.status || "aperto",
       descrizione: b.descrizione || b.description || ""
@@ -687,22 +823,20 @@ async function caricaBandi() {
     aggiornaStatistiche();
     renderBandi(bandiFiltrati);
 
-    // Se non ci sono risultati, mostra messaggio più specifico
     if (!tuttiBandi.length) {
       container.innerHTML = '<div class="no-results">Nessun bando trovato. Controlla la console (network) e verifica che lo scraping abbia scritto i dati nell\'API o nel file locale.</div>';
     }
   } catch (e) {
     console.error("[caricaBandi] errore:", e);
-    // Fallback a DB locale se l’API fallisce
     if (typeof bandiDatabase !== "undefined") {
       tuttiBandi = bandiDatabase.map(b => ({
         ...b,
         titolo: b.titolo || b.title || "Bando senza titolo",
         categoria: b.categoria || b.category || "generale",
         regione: b.regione || b.region || "nazionale",
-        ente: (b.ente || b.entity || b.source || "altro").toLowerCase(),
+        ente: (b.ente || b.entity || b.source || "altro"),
         scadenza: b.scadenza || b.deadline || "N/D",
-        importo: b.importo || b.amount || 0,
+        importo: (b.importo ?? b.amount ?? 0),
         link: b.link || b.url || "#",
         stato: b.stato || b.status || "aperto",
         descrizione: b.descrizione || b.description || ""
@@ -715,6 +849,88 @@ async function caricaBandi() {
     }
   }
 }
+
+/* ---------- DRAWER (DETTAGLIO) ---------- */
+const drawer = document.getElementById('drawer');
+const drawerOverlay = document.getElementById('drawerOverlay');
+const drawerContent = document.getElementById('drawerContent');
+const drawerVisitLink = document.getElementById('drawerVisitLink');
+const btnBackToList = document.getElementById('btnBackToList');
+const btnCloseDrawer = document.getElementById('btnCloseDrawer');
+
+function openDrawer(index) {
+  if (index == null || isNaN(index)) return;
+  const b = bandiFiltrati[index];
+  if (!b) return;
+
+  drawerIndexCorrente = index;
+
+  const titolo = b.titolo || b.title || "Bando senza titolo";
+  const ente = b.ente || b.entity || "N/D";
+  const descrizione = b.descrizione || b.description || "Nessuna descrizione disponibile";
+  const categoria = getCategoriaLabel(b.categoria || b.category || "generale");
+  const stato = getStatoLabel(b.stato || b.status || "aperto");
+  const regione = getRegioneLabel(b.regione || b.region);
+  const scadenza = b.scadenza || b.deadline || "N/D";
+  const importo = (b.importo ?? b.amount);
+  const importoView = (importo === undefined || importo === null || importo === "" ) ? "N/D" : importo;
+  const link = (b.link || b.url || "#").replace(/^http:\/\//i, "https://");
+
+  document.getElementById('drawerTitle').textContent = titolo;
+  drawerContent.innerHTML = `
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+      <span class="badge">${categoria}</span>
+      <span class="badge">${stato}</span>
+    </div>
+    <div class="drawer-details">
+      <div class="item"><div class="label">Ente</div><div class="value">${ente}</div></div>
+      <div class="item"><div class="label">Regione</div><div class="value">${regione}</div></div>
+      <div class="item"><div class="label">Scadenza</div><div class="value">${scadenza}</div></div>
+      <div class="item"><div class="label">Importo</div><div class="value">${importoView}</div></div>
+    </div>
+    <div class="item" style="border: 1px solid var(--color-card-border); border-radius: 10px; padding: 12px;">
+      <div class="label" style="margin-bottom:6px;">Descrizione</div>
+      <div>${descrizione}</div>
+    </div>
+  `;
+  drawerVisitLink.href = link;
+
+  drawer.setAttribute('aria-hidden', 'false');
+  drawerOverlay.setAttribute('aria-hidden', 'false');
+  drawer.classList.add('open');
+  drawerOverlay.classList.add('open');
+  document.body.classList.add('no-scroll');
+
+  // focus management
+  setTimeout(() => btnBackToList.focus(), 10);
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  drawerOverlay.classList.remove('open');
+  drawer.setAttribute('aria-hidden', 'true');
+  drawerOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('no-scroll');
+
+  // restituisco il focus alla card corrispondente (se presente)
+  if (drawerIndexCorrente != null) {
+    const card = document.querySelector(`.bando-card[data-index="${drawerIndexCorrente}"]`);
+    if (card) card.focus();
+  }
+  drawerIndexCorrente = null;
+}
+
+// Interazioni overlay / pulsanti
+drawerOverlay.addEventListener('click', closeDrawer);
+btnBackToList.addEventListener('click', closeDrawer);
+btnCloseDrawer.addEventListener('click', closeDrawer);
+
+// Chiudi con ESC
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && drawer.classList.contains('open')) {
+    closeDrawer();
+  }
+});
 
 // Avvia il caricamento quando il DOM è pronto
 window.addEventListener('DOMContentLoaded', () => {
