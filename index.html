@@ -630,6 +630,40 @@
     overflow-x: hidden;
   }
 }
+/* 🔧 Miglioramento pulsante "Vai al bando" */
+.btn-primary {
+  background: linear-gradient(180deg, rgba(var(--color-teal-500-rgb), 0.95), rgba(var(--color-teal-500-rgb), 1));
+  color: var(--color-btn-primary-text);
+  box-shadow: 0 3px 10px rgba(var(--color-teal-500-rgb), 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 550;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(180deg, rgba(var(--color-teal-500-rgb), 1), rgba(var(--color-teal-500-rgb), 0.95));
+  box-shadow: 0 5px 14px rgba(var(--color-teal-500-rgb), 0.35);
+  transform: translateY(-1px);
+}
+
+/* Allineamento coerente tra i pulsanti */
+.bando-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Aggiusta padding per un aspetto più bilanciato */
+.btn-small {
+  padding: 10px 16px;
+  font-size: var(--font-size-sm);
+  border-radius: 10px;
+}
 
   </style>
 </head>
