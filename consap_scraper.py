@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime
+import re
 
 class ConsapScraper:
     def __init__(self):
@@ -19,7 +20,7 @@ class ConsapScraper:
 
             links = set()
 
-            # 🔗 Esplora solo le sezioni pertinenti
+            # 1️⃣ Scansione sezioni principali per trovare tutti i fondi
             for start_url in self.start_urls:
                 try:
                     r = requests.get(start_url, timeout=10)
@@ -29,7 +30,7 @@ class ConsapScraper:
                     for a in soup.find_all("a", href=True):
                         href = a["href"].strip()
 
-                        # normalizza URL relativi
+                        # normalizza URL
                         if href.startswith("/"):
                             full_url = urljoin(start_url, href)
                         elif href.startswith("https://www.consap.it/"):
@@ -42,57 +43,84 @@ class ConsapScraper:
                         # ignora pagine non rilevanti
                         if not path or any(x in path for x in [
                             "chi-siamo", "media-room", "contatti", "privacy", "cookie",
-                            "news", "comunicati-stampa", "dicono-di-noi", "video"
+                            "news", "comunicati", "istituzionale", "video"
                         ]):
                             continue
 
-                        # tieni solo fondi veri
+                        # tieni solo pagine con fondi o bonus
                         if any(path.startswith(prefix) for prefix in [
-                            "fondo-", "bonus-", "indennizzo-", "sostegno-", "sisma-", "garanzia-", "ricostruzione-"
+                            "fondo-", "bonus-", "indennizzo-", "sostegno-", "sisma-", "garanzia-",
+                            "ricostruzione-", "buono-", "carta-"
                         ]):
                             links.add(full_url)
                 except Exception as e:
                     print(f"[ConsapScraper] ⚠️ Errore su sezione {start_url}: {e}")
 
-            print(f"[ConsapScraper] 🌐 Trovati {len(links)} link potenziali.")
+            print(f"[ConsapScraper] 🌐 Trovati {len(links)} link potenziali da Consap.")
 
-            # 🔍 Analizza ogni pagina valida
-            for url in links:
+            # 2️⃣ Analizza ogni fondo trovato
+            for url in sorted(list(links)):
                 try:
                     sub = requests.get(url, timeout=10)
                     sub.raise_for_status()
                     subsoup = BeautifulSoup(sub.text, "html.parser")
 
-                    titolo = (subsoup.find("h1") or subsoup.find("title")).get_text(strip=True)
+                    # titolo principale
+                    titolo_tag = subsoup.find("h1") or subsoup.find("title")
+                    titolo = titolo_tag.get_text(strip=True) if titolo_tag else "Bando Consap"
                     titolo_lower = titolo.lower()
 
-                    # ignora pagine tipo Media Room, Video, ecc.
+                    # ignora pagine inutili
                     if any(x in titolo_lower for x in ["media room", "video", "comunicato", "istituzionale"]):
                         continue
 
-                    content = subsoup.find("div", class_="content") or subsoup
-                    descrizione = content.get_text(" ", strip=True)[:800]
+                    # corpo testo vero (sezione centrale)
+                    content = subsoup.find("div", class_="single-content") or subsoup.find("main") or subsoup
+                    testo = content.get_text(" ", strip=True)
 
-                    # categorizzazione semplice
+                    # pulizia del testo
+                    testo = re.sub(r"(Chi siamo|Media Room|Contatti|Servizi|Certificazioni|Ruolo dei periti|Centro di Informazione|Organismo di Indennizzo)[^.]*", "", testo)
+                    testo = re.sub(r"\s+", " ", testo).strip()
+
+                    # stato del fondo (aperto/chiuso)
+                    testo_lower = testo.lower()
+                    if any(kw in testo_lower for kw in [
+                        "non è più possibile presentare domanda",
+                        "fondo abrogato",
+                        "non è più attivo",
+                        "chiuso",
+                        "cessato"
+                    ]):
+                        stato = "chiuso"
+                    else:
+                        stato = "aperto"
+
+                    descrizione = testo[:800] if testo else "Nessuna descrizione disponibile."
+
+                    # categorizzazione automatica
                     if any(x in titolo_lower for x in ["casa", "mutuo", "immobile"]):
                         categoria = "immobili"
-                    elif any(x in titolo_lower for x in ["impresa", "azienda"]):
+                    elif any(x in titolo_lower for x in ["impresa", "azienda", "autotrasporto", "ecologica"]):
                         categoria = "imprese"
+                    elif any(x in titolo_lower for x in ["bonus", "cultura", "studio", "docente", "vista", "patente"]):
+                        categoria = "lavoro e formazione"
                     else:
                         categoria = "generale"
 
                     bando = {
                         "titolo": titolo,
-                        "descrizione": descrizione or "Nessuna descrizione disponibile.",
+                        "descrizione": descrizione,
                         "ente": self.source,
                         "categoria": categoria,
                         "regione": "nazionale",
-                        "stato": "aperto",
+                        "stato": stato,
                         "importo": 0,
                         "scadenza": "N/D",
                         "link": url
                     }
+
                     bandi.append(bando)
+
                 except Exception as sub_e:
                     print(f"[ConsapScraper] ⚠️ Errore parsing {url}: {sub_e}")
 
