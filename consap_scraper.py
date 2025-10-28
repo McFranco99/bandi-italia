@@ -99,13 +99,13 @@ class ConsapScraper:
 
                     # categorizzazione coerente con BandiPerTe
                     if any(x in titolo_lower for x in ["casa", "mutuo", "immobile"]):
-                        categoria = "Immobili"
+                        categoria = "immobili"
                     elif any(x in titolo_lower for x in ["impresa", "azienda", "autotrasporto", "ecologica"]):
-                        categoria = "Imprese e Investimenti"
+                        categoria = "imprese e investimenti"
                     elif any(x in titolo_lower for x in ["bonus", "cultura", "studio", "docente", "vista", "patente"]):
-                        categoria = "Lavoro e Concorsi"
+                        categoria = "lavoro e concorsi"
                     else:
-                        categoria = "Generale"
+                        categoria = "generale"
 
                     bando = {
                         "titolo": titolo,
