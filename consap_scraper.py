@@ -99,13 +99,13 @@ class ConsapScraper:
 
                     # categorizzazione automatica
                     if any(x in titolo_lower for x in ["casa", "mutuo", "immobile"]):
-                        categoria = "immobili"
+                        categoria = "Immobili"
                     elif any(x in titolo_lower for x in ["impresa", "azienda", "autotrasporto", "ecologica"]):
-                        categoria = "imprese"
+                        categoria = "Imprese"
                     elif any(x in titolo_lower for x in ["bonus", "cultura", "studio", "docente", "vista", "patente"]):
-                        categoria = "lavoro e formazione"
+                        categoria = "Lavoro e Concorsi"
                     else:
-                        categoria = "generale"
+                        categoria = "Generale"
 
                     bando = {
                         "titolo": titolo,
