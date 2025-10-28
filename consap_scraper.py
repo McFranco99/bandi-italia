@@ -97,11 +97,11 @@ class ConsapScraper:
 
                     descrizione = testo[:800] if testo else "Nessuna descrizione disponibile."
 
-                    # categorizzazione automatica
+                    # categorizzazione coerente con BandiPerTe
                     if any(x in titolo_lower for x in ["casa", "mutuo", "immobile"]):
                         categoria = "Immobili"
                     elif any(x in titolo_lower for x in ["impresa", "azienda", "autotrasporto", "ecologica"]):
-                        categoria = "Imprese"
+                        categoria = "Imprese e Investimenti"
                     elif any(x in titolo_lower for x in ["bonus", "cultura", "studio", "docente", "vista", "patente"]):
                         categoria = "Lavoro e Concorsi"
                     else:
@@ -112,7 +112,7 @@ class ConsapScraper:
                         "descrizione": descrizione,
                         "ente": self.source,
                         "categoria": categoria,
-                        "regione": "nazionale",
+                        "regione": "Nazionale",
                         "stato": stato,
                         "importo": 0,
                         "scadenza": "N/D",
