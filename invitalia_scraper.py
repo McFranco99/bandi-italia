@@ -1,9 +1,12 @@
 import re
 import time
+import json
+import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime
+
 
 class InvitaliaScraper:
     BASE = "https://www.invitalia.it"
@@ -13,13 +16,10 @@ class InvitaliaScraper:
         "/per-le-pa/incentivi-e-strumenti",
     ]
 
-    # Indizi tipici nelle card elenco
     STATUS_TOKENS = ("attivo", "in apertura", "chiuso", "data apertura", "data chiusura")
-    # Evita link/etichette di servizio
     TITLE_BLOCK = ("scopri", "seguici", "rimuovi filtri", "cookie", "privacy", "contatti", "newsletter", "news", "eventi")
-    HREF_BLOCK  = ("privacy", "cookie", "contatti", "trasparenza", "urp", "newsletter", "login", "accedi", "press", "mappa")
-    # Percorsi ammessi per dettagli
-    PATH_ALLOW  = (r"/incentivi", r"/agevolaz", r"/bando", r"/bandi", r"/misur", r"/finanziam")
+    HREF_BLOCK = ("privacy", "cookie", "contatti", "trasparenza", "urp", "newsletter", "login", "accedi", "press", "mappa")
+    PATH_ALLOW = (r"/incentivi", r"/agevolaz", r"/bando", r"/bandi", r"/misur", r"/finanziam")
 
     TIMEOUT = 25
     MIN_TITLE = 10
@@ -28,6 +28,7 @@ class InvitaliaScraper:
     def __init__(self):
         self.sess = requests.Session()
         self.sess.headers.update({"User-Agent": "Mozilla/5.0 (BandiItaliaBot/1.0)"})
+        self.manual_file = "data/manual_overrides.json"  # ✅ file override
 
     # ---------- Utils ----------
     def _clean(self, s: str) -> str:
@@ -35,7 +36,6 @@ class InvitaliaScraper:
 
     def _sanitize_title(self, t: str) -> str:
         t = self._clean(t)
-        # rimuove prefissi “Leggi tutto su”, “Leggi tutto”, “Scopri …”
         t = re.sub(r"^\s*(leggi\s+tutto(\s+su)?|scopri(?:\s+tutto)?)\s*:?\s*", "", t, flags=re.I)
         return re.sub(r"\s{2,}", " ", t).strip()
 
@@ -96,8 +96,19 @@ class InvitaliaScraper:
             return urljoin(current_url, cand.get("href"))
         return None
 
+    # ---------- Manual overrides ----------
+    def _carica_override(self):
+        """Carica eventuali descrizioni brevi o aggiornamenti manuali."""
+        if os.path.exists(self.manual_file):
+            try:
+                with open(self.manual_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"[InvitaliaScraper] ⚠️ Errore lettura manual_overrides.json: {e}")
+        return {}
+
     # ---------- Listing parsing ----------
-    def _extract_cards_from_listing(self, soup, base_url: str) -> list[dict]:
+    def _extract_cards_from_listing(self, soup, base_url: str, overrides: dict) -> list[dict]:
         results = []
         blocks = soup.select("article, .card, .teaser, li, .list-item")
         for b in blocks:
@@ -131,23 +142,30 @@ class InvitaliaScraper:
             elif "chiuso" in low:
                 status = "chiuso"
 
+            # 🔄 Applica override se presente
+            override = overrides.get(title) or overrides.get(link) or {}
+            descrizione_breve = override.get("descrizione_breve", "")
+            importo = override.get("importo", 0)
+            scadenza = override.get("scadenza", deadline)
+
             results.append({
                 "id": abs(hash(link)),
-                "title": title,
-                "category": "imprese",
-                "region": "nazionale",
-                "entity": "Invitalia",
-                "description": snippet,
-                "amount": 0,
-                "deadline": deadline,
-                "published": datetime.utcnow().strftime("%Y-%m-%d"),
-                "url": link,
-                "source": "invitalia",
-                "status": status
+                "titolo": title,
+                "categoria": "imprese",
+                "regione": "nazionale",
+                "ente": "Invitalia",
+                "descrizione": snippet,
+                "descrizione_breve": descrizione_breve,
+                "importo": importo,
+                "scadenza": scadenza,
+                "pubblicato": datetime.utcnow().strftime("%Y-%m-%d"),
+                "link": link,
+                "fonte": "invitalia",
+                "stato": status
             })
         return results
 
-    def scrape_listing(self, start_url: str, max_pages: int = 30, sleep_sec: float = 0.5) -> list[dict]:
+    def scrape_listing(self, start_url: str, max_pages: int = 30, sleep_sec: float = 0.5, overrides=None) -> list[dict]:
         out, seen = [], set()
         url = start_url
         pages = 0
@@ -155,11 +173,11 @@ class InvitaliaScraper:
             r = self.sess.get(url, timeout=self.TIMEOUT)
             r.raise_for_status()
             soup = BeautifulSoup(r.text, "lxml")
-            items = self._extract_cards_from_listing(soup, url)
+            items = self._extract_cards_from_listing(soup, url, overrides)
             for it in items:
-                if it["url"] in seen:
+                if it["link"] in seen:
                     continue
-                seen.add(it["url"])
+                seen.add(it["link"])
                 out.append(it)
             url = self._find_next_page(soup, url)
             pages += 1
@@ -167,23 +185,25 @@ class InvitaliaScraper:
         return out
 
     def scrape_incentivi(self, max_pages_per_list: int = 30) -> list[dict]:
+        overrides = self._carica_override()
         all_items = []
         for ep in self.ENTRYPOINTS:
             url = urljoin(self.BASE, ep)
-            all_items.extend(self.scrape_listing(url, max_pages=max_pages_per_list))
+            all_items.extend(self.scrape_listing(url, max_pages=max_pages_per_list, overrides=overrides))
         # dedup finale
         seen, dedup = set(), []
         for r in all_items:
-            if r["url"] in seen:
+            if r["link"] in seen:
                 continue
-            seen.add(r["url"])
+            seen.add(r["link"])
             dedup.append(r)
-        print(f"Invitalia: {len(all_items)} trovati, {len(dedup)} unici")
+        print(f"[InvitaliaScraper] ✅ {len(dedup)} bandi unici trovati (su {len(all_items)} totali).")
         return dedup
+
 
 if __name__ == "__main__":
     s = InvitaliaScraper()
     data = s.scrape_incentivi()
     print("Esempi:", len(data))
     for d in data[:10]:
-        print(d["status"], "|", d["deadline"], "|", d["title"], "->", d["url"])
+        print(d["stato"], "|", d["scadenza"], "|", d["titolo"], "->", d["link"])
