@@ -1,0 +1,12 @@
+{
+  "Fondo di sospensione mutui per l’acquisto della prima casa": {
+    "descrizione_breve": "Permette di sospendere temporaneamente il pagamento delle rate del mutuo per la prima casa in caso di difficoltà economiche o eventi straordinari. Gestito da Consap.",
+    "scadenza": "N/D",
+    "importo": 0
+  },
+  "Fondo Prima Casa": {
+    "descrizione_breve": "Garanzia pubblica sul mutuo per l'acquisto della prima casa, fino al 50%. Accesso riservato a giovani coppie, under 36 e famiglie con figli. Scadenza prorogata fino al 31 dicembre 2027.",
+    "scadenza": "2027-12-31",
+    "importo": 250000
+  }
+}
