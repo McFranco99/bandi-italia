@@ -8,5 +8,15 @@
     "descrizione_breve": "Garanzia pubblica sul mutuo per l'acquisto della prima casa, fino al 50%. Accesso riservato a giovani coppie, under 36 e famiglie con figli. Scadenza prorogata fino al 31 dicembre 2027.",
     "scadenza": "2027-12-31",
     "importo": 250000
+  },
+  "Smart&Start Italia": {
+    "descrizione_breve": "Finanziamento agevolato fino al 90% per startup innovative, senza garanzie.",
+    "scadenza": "2026-12-31",
+    "importo": 1500000
+  },
+  "Resto al Sud": {
+    "descrizione_breve": "Contributo a fondo perduto e finanziamento agevolato per giovani imprenditori nel Mezzogiorno.",
+    "scadenza": "2025-12-31",
+    "importo": 200000
   }
 }
