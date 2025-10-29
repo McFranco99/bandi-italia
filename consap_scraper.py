@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime
 import re
+import json
+import os
 
 
 def normalizza_categoria(categoria):
@@ -30,9 +32,22 @@ class ConsapScraper:
             "https://www.consap.it/servizi-finanziari/"
         ]
         self.source = "Consap"
+        self.manual_file = "data/manual_overrides.json"  # ✅ file per descrizioni/modifiche manuali
+
+    def carica_modifiche_manual(self):
+        """Carica eventuali descrizioni brevi o dati aggiornati manualmente."""
+        if os.path.exists(self.manual_file):
+            try:
+                with open(self.manual_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"[ConsapScraper] ⚠️ Errore lettura file manual_overrides.json: {e}")
+        return {}
 
     def scrape(self):
         bandi = []
+        manual_data = self.carica_modifiche_manual()
+
         try:
             print("[ConsapScraper] 🔍 Avvio scraping Consap...")
 
@@ -95,8 +110,6 @@ class ConsapScraper:
                     # corpo testo vero (sezione centrale)
                     content = subsoup.find("div", class_="single-content") or subsoup.find("main") or subsoup
                     testo = content.get_text(" ", strip=True)
-
-                    # pulizia del testo
                     testo = re.sub(r"(Chi siamo|Media Room|Contatti|Servizi|Certificazioni|Ruolo dei periti|Centro di Informazione|Organismo di Indennizzo)[^.]*", "", testo)
                     testo = re.sub(r"\s+", " ", testo).strip()
 
@@ -125,18 +138,21 @@ class ConsapScraper:
                     else:
                         categoria = "generale"
 
-                    # ✅ Normalizzazione finale
                     categoria = normalizza_categoria(categoria)
+
+                    # 🔄 Applica eventuali modifiche manuali (descrizione breve, importo, scadenza ecc.)
+                    override = manual_data.get(titolo) or manual_data.get(url) or {}
 
                     bando = {
                         "titolo": titolo,
                         "descrizione": descrizione,
+                        "descrizione_breve": override.get("descrizione_breve", ""),  # ✍️ testo editoriale manuale
                         "ente": self.source,
                         "categoria": categoria,
                         "regione": "Nazionale",
                         "stato": stato,
-                        "importo": 0,
-                        "scadenza": "N/D",
+                        "importo": override.get("importo", 0),
+                        "scadenza": override.get("scadenza", "N/D"),
                         "link": url
                     }
 
