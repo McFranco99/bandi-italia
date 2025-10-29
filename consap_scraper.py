@@ -4,6 +4,24 @@ from urllib.parse import urljoin, urlparse
 from datetime import datetime
 import re
 
+
+def normalizza_categoria(categoria):
+    """
+    Uniforma la categoria in una delle 4 principali:
+    'immobili', 'imprese', 'lavoro', 'generale'.
+    """
+    if not categoria:
+        return "generale"
+    cat = categoria.lower().strip()
+    if "lavor" in cat or "concors" in cat:
+        return "lavoro"
+    if "impres" in cat or "invest" in cat:
+        return "imprese"
+    if "immobil" in cat or "casa" in cat or "mutuo" in cat:
+        return "immobili"
+    return "generale"
+
+
 class ConsapScraper:
     def __init__(self):
         self.start_urls = [
@@ -106,6 +124,9 @@ class ConsapScraper:
                         categoria = "lavoro e concorsi"
                     else:
                         categoria = "generale"
+
+                    # ✅ Normalizzazione finale
+                    categoria = normalizza_categoria(categoria)
 
                     bando = {
                         "titolo": titolo,
