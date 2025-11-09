@@ -32,11 +32,6 @@ def generate_real_bandi_database():
     except Exception as e:
         print(f"⚠️ Errore Consap: {e}")
 
-    try:
-        bandi += GazzettaScraper().scrape_ultimi_30_giorni()
-        print(f"✅ Gazzetta: {len(bandi)} bandi totali")
-    except Exception as e:
-        print(f"⚠️ Errore Gazzetta: {e}")
 
     return bandi
 
