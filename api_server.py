@@ -6,6 +6,7 @@ from datetime import datetime
 import threading
 import time
 import sys
+import subprocess
 
 # ========================
 # 🔧 CONFIGURAZIONE BASE
@@ -217,27 +218,41 @@ def serve_ads():
 # 🚀 AVVIO AUTOMATICO PER RAILWAY
 # ========================
 
+def esegui_scraping_immediato():
+    """Esegue lo scraping iniziale in background senza bloccare Flask"""
+    print("\n⚙️ Avvio scraping immediato con genera_database_bandi.py...\n")
+    try:
+        result = subprocess.run(
+            ["python", "genera_database_bandi.py"],
+            capture_output=True,
+            text=True,
+            timeout=600  # massimo 10 minuti
+        )
+        print(result.stdout)
+        if result.returncode == 0:
+            print("✅ genera_database_bandi.py eseguito con successo al primo avvio.")
+            carica_bandi_da_json()
+        else:
+            print(f"⚠️ Errore in genera_database_bandi.py (codice {result.returncode})")
+            print(result.stderr)
+    except Exception as e:
+        print(f"❌ Errore durante lo scraping immediato: {e}")
+
 try:
     print("⚙️ Avvio automatico di scraping iniziale e aggiornamento immediato...")
     
-    # 1️⃣ Carica i bandi esistenti
+    # 1️⃣ Carica i bandi esistenti (da file)
     avvia_scraping_iniziale()
     
-    # 2️⃣ Avvia subito uno scraping completo per aggiornare il file JSON
-    print("\n⚙️ Avvio scraping immediato con genera_database_bandi.py...\n")
-    result = os.system("python genera_database_bandi.py")
+    # 2️⃣ Lancia subito lo scraping in background (senza bloccare Flask)
+    threading.Thread(target=esegui_scraping_immediato, daemon=True).start()
     
-    if result == 0:
-        print("✅ genera_database_bandi.py eseguito con successo al primo avvio.")
-        carica_bandi_da_json()
-    else:
-        print(f"⚠️ Errore durante l'esecuzione iniziale di genera_database_bandi.py (codice {result})")
-    
-    # 3️⃣ Avvia il thread per gli aggiornamenti periodici (ogni 12 ore)
+    # 3️⃣ Avvia anche il thread per gli aggiornamenti periodici (ogni 12 ore)
     avvia_thread_scraping()
 
 except Exception as e:
     print(f"❌ Errore in avvio automatico: {e}")
+
 
 
 @app.route("/<path:path>")
