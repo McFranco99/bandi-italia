@@ -218,11 +218,27 @@ def serve_ads():
 # ========================
 
 try:
-    print("⚙️ Avvio automatico di scraping iniziale e thread background...")
+    print("⚙️ Avvio automatico di scraping iniziale e aggiornamento immediato...")
+    
+    # 1️⃣ Carica i bandi esistenti
     avvia_scraping_iniziale()
+    
+    # 2️⃣ Avvia subito uno scraping completo per aggiornare il file JSON
+    print("\n⚙️ Avvio scraping immediato con genera_database_bandi.py...\n")
+    result = os.system("python genera_database_bandi.py")
+    
+    if result == 0:
+        print("✅ genera_database_bandi.py eseguito con successo al primo avvio.")
+        carica_bandi_da_json()
+    else:
+        print(f"⚠️ Errore durante l'esecuzione iniziale di genera_database_bandi.py (codice {result})")
+    
+    # 3️⃣ Avvia il thread per gli aggiornamenti periodici (ogni 12 ore)
     avvia_thread_scraping()
+
 except Exception as e:
     print(f"❌ Errore in avvio automatico: {e}")
+
 
 @app.route("/<path:path>")
 def serve_static_files(path):
