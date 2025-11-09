@@ -178,7 +178,7 @@ def aggiorna_bandi_background():
         except Exception as e:
             print(f"❌ Errore generale scraping: {str(e)}")
 
-        time.sleep(30 * 60)
+        time.sleep(12 * 60 * 60)
 
 
 def avvia_scraping_iniziale():
