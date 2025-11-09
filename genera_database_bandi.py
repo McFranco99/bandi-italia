@@ -43,5 +43,19 @@ def save_to_json():
     print(f"💾 File salvato con {len(bandi)} bandi.")
 
 
+        # 📊 LOG RIEPILOGATIVO
+    try:
+        print("\n📊 Riepilogo per sorgente:")
+        sorgenti = {}
+        for bando in bandi:
+            src = bando.get("source", "sconosciuta")
+            sorgenti[src] = sorgenti.get(src, 0) + 1
+        for src, count in sorgenti.items():
+            print(f"   - {src}: {count} bandi")
+        print("\n✅ Aggiornamento completato con successo.")
+    except Exception as e:
+        print(f"⚠️ Errore durante il riepilogo: {e}")
+
+
 if __name__ == "__main__":
     save_to_json()
