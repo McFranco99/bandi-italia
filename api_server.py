@@ -260,8 +260,8 @@ def serve_static_files(path):
     """Serve tutti i file statici dalla root (per AdSense, sitemap, robots, ecc.)"""
     return send_from_directory(".", path)
 
-# Solo per esecuzione locale
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print(f"🌐 Esecuzione locale su porta {port}")
-    app.run(host="0.0.0.0", port=port, debug=True)
+    import os
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
