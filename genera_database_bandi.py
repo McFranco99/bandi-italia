@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from inpa_scraper import InpaScraper
+from inpa_scraper import InPAScraper
 from invitalia_scraper import InvitaliaScraper
 from mimit_scraper import MIMITScraper
 from consap_scraper import ConsapScraper
@@ -9,7 +9,7 @@ from gazzetta_scraper import GazzettaScraper
 def generate_real_bandi_database():
     bandi = []
     try:
-        bandi += InpaScraper().scrape()
+        bandi += InPAScraper().scrape_bandi_list()
         print(f"✅ InPA: {len(bandi)} bandi totali")
     except Exception as e:
         print(f"⚠️ Errore InPA: {e}")
