@@ -11,4 +11,5 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 # Comando di avvio
-CMD ["python", "api_server.py"]
+CMD ["bash", "-c", "python api_server.py --port=$PORT"]
+
