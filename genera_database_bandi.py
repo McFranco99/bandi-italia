@@ -39,7 +39,8 @@ def generate_real_bandi_database():
 def save_to_json():
     bandi = generate_real_bandi_database()
     with open('bandi_database_reale.json', 'w', encoding='utf-8') as f:
-        json.dump(bandi, f, ensure_ascii=False, indent=2)
+        json.dump(bandi, f, ensure_ascii=False)  # senza indentazione
+
     print(f"💾 File salvato con {len(bandi)} bandi.")
 
 
