@@ -121,25 +121,28 @@ def aggiorna_bandi_background():
     while True:
         try:
             print(f"\n{'=' * 70}")
-            print(f"🔄 Avvio aggiornamento automatico bandi - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"🔄 Avvio aggiornamento bandi - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"{'=' * 70}\n")
 
-            # 🔁 Esegui direttamente lo script che aggrega tutti gli scraper
+            # 🔁 Esegui lo script che aggrega tutti gli scraper reali
             result = os.system("python genera_database_bandi.py")
+
             if result == 0:
-                print("✅ Script genera_database_bandi.py eseguito correttamente.")
-                carica_bandi_da_json()  # ricarica la cache aggiornata
+                print("✅ genera_database_bandi.py eseguito correttamente.")
+                # Ricarica in cache i dati aggiornati
+                carica_bandi_da_json()
                 ultimo_aggiornamento = datetime.now()
                 print(f"✅ Cache aggiornata con {len(bandi_cache)} bandi.")
             else:
-                print("⚠️ Errore durante l'esecuzione di genera_database_bandi.py")
+                print(f"⚠️ Errore nell'esecuzione dello script (codice {result})")
 
             print(f"⏰ Prossimo aggiornamento tra 12 ore\n{'=' * 70}\n")
-        
-        except Exception as e:
-            print(f"❌ Errore generale aggiornamento bandi: {str(e)}")
 
-        time.sleep(12 * 60 * 60)  # ogni 12 ore
+        except Exception as e:
+            print(f"❌ Errore generale durante l'aggiornamento: {e}")
+
+        time.sleep(12 * 60 * 60)
+
 
 
 
