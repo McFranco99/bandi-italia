@@ -11,5 +11,6 @@ COPY . /app
 RUN pip install -r requirements.txt
 
 # Comando di avvio
-CMD ["bash", "-c", "python api_server.py --port=$PORT"]
+CMD ["bash", "-c", "gunicorn -b 0.0.0.0:${PORT:-5000} api_server:app"]
+
 
