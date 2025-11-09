@@ -121,64 +121,26 @@ def aggiorna_bandi_background():
     while True:
         try:
             print(f"\n{'=' * 70}")
-            print(f"🔄 Avvio scraping automatico - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"🔄 Avvio aggiornamento automatico bandi - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"{'=' * 70}\n")
 
-            nuovi_bandi_temp = []
-
-
-
-            # Gazzetta
-            if GAZZETTA_AVAILABLE:
-                try:
-                    scraper = GazzettaScraper()
-                    nuovi_bandi_temp += scraper.scrape_ultimi_30_giorni()
-                    print(f"✅ Gazzetta: {len(nuovi_bandi_temp)} bandi trovati")
-                except Exception as e:
-                    print(f"⚠️ Errore scraping Gazzetta: {e}")
-
-            # MIMIT
-            if MIMIT_AVAILABLE:
-                try:
-                    scraper = MIMITScraper()
-                    nuovi_bandi_temp += scraper.scrape_incentivi()
-                    print(f"✅ MIMIT: {len(nuovi_bandi_temp)} bandi trovati")
-                except Exception as e:
-                    print(f"⚠️ Errore scraping MIMIT: {e}")
-                    
-            if CONSAP_AVAILABLE:
-                try:
-                    scraper = ConsapScraper()
-                    nuovi_bandi_temp += scraper.scrape()
-                    print(f"✅ Consap: {len(nuovi_bandi_temp)} bandi trovati finora")
-                except Exception as e:
-                    print(f"⚠️ Errore scraping Consap: {e}")
-            
-
-            # Invitalia
-            if INVITALIA_AVAILABLE:
-                try:
-                    scraper = InvitaliaScraper()
-                    nuovi_bandi_temp += scraper.scrape_incentivi()
-                    print(f"✅ Invitalia: {len(nuovi_bandi_temp)} bandi trovati")
-                except Exception as e:
-                    print(f"⚠️ Errore scraping Invitalia: {e}")
-
-            # Aggiorna cache
-            if nuovi_bandi_temp:
-                bandi_cache[:] = nuovi_bandi_temp
-                salva_bandi_su_json()
+            # 🔁 Esegui direttamente lo script che aggrega tutti gli scraper
+            result = os.system("python genera_database_bandi.py")
+            if result == 0:
+                print("✅ Script genera_database_bandi.py eseguito correttamente.")
+                carica_bandi_da_json()  # ricarica la cache aggiornata
                 ultimo_aggiornamento = datetime.now()
-                print(f"✅ Cache aggiornata con {len(bandi_cache)} bandi totali")
+                print(f"✅ Cache aggiornata con {len(bandi_cache)} bandi.")
             else:
-                print("⚠️ Nessun bando recuperato")
+                print("⚠️ Errore durante l'esecuzione di genera_database_bandi.py")
 
-            print(f"⏰ Prossimo aggiornamento tra 30 minuti\n{'=' * 70}\n")
-
+            print(f"⏰ Prossimo aggiornamento tra 12 ore\n{'=' * 70}\n")
+        
         except Exception as e:
-            print(f"❌ Errore generale scraping: {str(e)}")
+            print(f"❌ Errore generale aggiornamento bandi: {str(e)}")
 
-        time.sleep(12 * 60 * 60)
+        time.sleep(12 * 60 * 60)  # ogni 12 ore
+
 
 
 def avvia_scraping_iniziale():
