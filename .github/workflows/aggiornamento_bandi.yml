@@ -1,0 +1,38 @@
+name: Aggiornamento automatico bandi
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"   # Ogni 12 ore
+  workflow_dispatch:          # Puoi avviarlo manualmente dal tab "Actions"
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Esegui scraping bandi
+        run: |
+          python genera_database_bandi.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: https://github.com/McFranco99/bandi-italia.git
+
+      - name: Commit & push aggiornamento
+        run: |
+          git config --global user.name "Bandiperte Bot"
+          git config --global user.email "bot@bandiperte.it"
+          git add bandi_database_reale.json
+          git commit -m "Aggiornamento automatico bandi ($(date +'%Y-%m-%d %H:%M'))" || echo "Nessuna modifica"
+          git push
