@@ -8,6 +8,7 @@ class InPAScraper:
         bandi = []
         headers = {'Content-Type': 'application/json'}
         for page in range(max_pages):
+            r = None  # inizializza r per sicurezza
             params = {"page": page, "size": self.PAGE_SIZE}
             payload = {}
             try:
@@ -17,13 +18,24 @@ class InPAScraper:
                 content = data.get("content", [])
                 if not content:
                     break
-                # Mappatura/arricchimento campo 'titolo'
+    
+                # Mappatura titolo
                 for bando in content:
                     titolo = bando.get('titolo') or bando.get('descrizioneBreve') or bando.get('descrizione') or 'Senza titolo'
                     bando['titolo'] = titolo.strip() if titolo else 'Senza titolo'
                     bandi.append(bando)
+    
                 print(f"Pagina {page}: {len(content)} bandi trovati")
+    
             except Exception as e:
-                print(f"Errore InPA pagina {page}: {e}; risposta: {getattr(r, 'text', '')}")
+                testo = ""
+                if r is not None:
+                    try:
+                        testo = r.text[:300]
+                    except:
+                        pass
+                print(f"⚠️ Errore InPA pagina {page}: {e}; risposta parziale: {testo}")
                 break
+    
         return bandi
+
